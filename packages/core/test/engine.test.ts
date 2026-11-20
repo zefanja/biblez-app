@@ -113,3 +113,33 @@ describe("one stage at a time", () => {
     expect(fallbackCandidate(snap, c2.id)?.stage).toBe(1);
   });
 });
+
+describe("session behaviour", () => {
+  it("new cards keep the second learning step and come back after the other cards", () => {
+    const snap = setup();
+    const order: string[] = [];
+    let t = T0;
+    for (let i = 0; i < 30; i++) {
+      const q = buildQueue(snap, t);
+      const next = q.now[0];
+      if (!next) break;
+      order.push(`${cardFace(snap, next.card).segment.part}${next.isNew ? "" : "'"}`);
+      t += 20_000;
+      applyReview(snap, next.card.id, "good", t);
+    }
+    // a..e once as new, then each again in its 10-minute step (learn-ahead at the end)
+    expect(order).toEqual(["a", "b", "c", "d", "e", "a'", "b'", "c'", "d'", "e'"]);
+  });
+
+  it("shuffles due reviews but keeps the order stable within a day", () => {
+    const snap = setup(1);
+    for (let day = 0; day < 4; day++) studyDay(snap, T0 + day * DAY);
+    const at = T0 + 6 * DAY;
+    const a = buildQueue(snap, at).now.filter((s) => !s.isNew).map((s) => s.card.id);
+    const b = buildQueue(snap, at + 3_600_000).now.filter((s) => !s.isNew).map((s) => s.card.id);
+    expect(a.length).toBeGreaterThan(3);
+    expect(b).toEqual(a);
+    const positions = a.map((id) => snap.segments.findIndex((s) => s.id === snap.cards.find((c) => c.id === id)!.segmentId));
+    expect(positions).not.toEqual([...positions].sort((x, y) => x - y));
+  });
+});

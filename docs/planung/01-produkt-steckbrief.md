@@ -356,15 +356,17 @@ mit echten Lerndaten überprüfen.
       Lernen (Nochmal/Gut), Heute, Meine Verse, Vers hinzufügen (Vorschläge +
       eigener Text), Rezitieren, Einstellungen, Anki-Export, Backup,
       Dunkelmodus, Schriftgröße, DE/EN; Browser-Test grün
-- Entscheidung beim Testen: **ein Lernschritt (1 Min.)** – „Nochmal" kommt in
-  derselben Runde wieder, „Gut" ist für heute erledigt.
+- [x] Abschnitte vor dem Anlegen anpassen (teilen per Wort, verbinden)
+- Lernschritte für neue Karten: **1 Min. → 10 Min.** (wie Anki). Karten im
+  10-Minuten-Schritt kommen am Ende der Runde wieder.
+- Reihenfolge: **Wiederholungen gemischt** (für den Tag stabil), neue
+  Abschnitte in Textreihenfolge.
 
 **Als Nächstes:**
-1. Abschnitte vor dem Anlegen von Hand anpassen (trennen/zusammenlegen)
-2. Freie Übersetzungen importieren (Lizenzen prüfen) + Stellenangaben-Parser
-3. Capacitor: iOS/Android-Projekte, SQLite-Plugin, lokale Erinnerung, Teilen-Menü für den Export
-4. PWA: Offline-Cache (Service Worker), installierbar
-5. Test mit 5 Personen aus der Zielgruppe
+1. Freie Übersetzungen importieren (Lizenzen prüfen) + Stellenangaben-Parser
+2. Capacitor: iOS/Android-Projekte, SQLite-Plugin, lokale Erinnerung, Teilen-Menü für den Export
+3. PWA: Offline-Cache (Service Worker), installierbar
+4. Test mit 5 Personen aus der Zielgruppe
 
 ## 12. Lizenz (Empfehlung)
 

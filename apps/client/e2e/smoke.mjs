@@ -40,7 +40,7 @@ try {
   await page.getByRole("button", { name: "Ich bin bereit" }).click();
   await page.getByRole("button", { name: "Aufdecken" }).waitFor();
   let answers = 0;
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 20; i++) {
     const reveal = page.getByRole("button", { name: "Aufdecken" });
     if (!(await reveal.isVisible().catch(() => false))) break;
     if (i === 0) await shot("03-card");
@@ -51,9 +51,10 @@ try {
     answers++;
   }
   await page.getByText("Geschafft!").waitFor({ timeout: 5000 });
-  if (answers !== 6) throw new Error(`expected 6 answers (5 chunks + 1 again), got ${answers}`);
+  // 5 chunks; each comes back once for its 10-minute step, the "again" card twice
+  if (answers !== 11) throw new Error(`expected 11 answers, got ${answers}`);
   await shot("05-done");
-  step(`studied ${answers} cards: 5 chunks, the "again" card came back once`);
+  step(`studied ${answers} answers: 5 chunks, second learning step kept, "again" repeated`);
 
   // "again" sends the card to a 1-minute step; the session may wait for it.
   await page.goto(`http://localhost:${port}/#/`);
@@ -71,10 +72,22 @@ try {
   await page.getByLabel("Titel").fill("Philipper 4,6–7");
   await page.getByLabel("Text einfügen").fill("6 Sorget nichts! sondern in allen Dingen lasset eure Bitten im Gebet und Flehen mit Danksagung vor Gott kund werden. 7 Und der Friede Gottes, welcher höher ist denn alle Vernunft, bewahre eure Herzen und Sinne in Christo Jesu!");
   await page.getByText(/2 Verse, \d+ Abschnitte erkannt/).waitFor();
-  await shot("07-add-text"); step("custom text: verses and chunks detected");
+  const before = await page.locator(".chunk-box").count();
+  await page.locator(".chunk-main").first().click();
+  await page.getByRole("button", { name: "Vor „nichts!“ trennen" }).click();
+  if ((await page.locator(".chunk-box").count()) !== before + 1) throw new Error("split did not add a chunk");
+  await shot("07-add-text");
+  await page.getByRole("button", { name: /verbinden$/ }).first().click();
+  if ((await page.locator(".chunk-box").count()) !== before) throw new Error("merge did not remove a chunk");
+  await page.locator(".chunk-main").nth(1).click();
+  await page.locator(".word-chip:not([disabled])").first().click();
+  const custom = await page.locator(".chunk-box").count();
+  step(`custom text: ${before} chunks detected, split + merge work (now ${custom})`);
   await page.getByRole("button", { name: "Sammlung anlegen" }).click();
   await page.getByText("Lies den Vers in Ruhe").waitFor();
-  step("custom collection created");
+  const created = await page.locator(".chunk").count();
+  if (created !== custom) throw new Error(`collection has ${created} chunks, editor had ${custom}`);
+  step("custom collection created with the edited chunks");
 
   await page.goto(`http://localhost:${port}/#/verses`);
   await page.getByRole("heading", { name: "Meine Verse" }).waitFor();
@@ -87,7 +100,7 @@ try {
 
   await page.goto(`http://localhost:${port}/#/settings`);
   const stats = await page.getByText(/Abschnitte · \d+ Wiederholungen/).textContent();
-  if (!/· 6 Wiederholungen/.test(stats ?? "")) throw new Error(`reviews not persisted: ${stats}`);
+  if (!/· 11 Wiederholungen/.test(stats ?? "")) throw new Error(`reviews not persisted: ${stats}`);
   step(`learning history survived reload (${stats})`);
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: ".apkg-Datei erstellen" }).click()]);
   const path = await dl.path();

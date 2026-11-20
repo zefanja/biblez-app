@@ -28,8 +28,9 @@ export interface ReplayResult {
 const schedulers = new Map<number, FSRS>();
 
 /**
- * FSRS scheduler. One learning step (1m): "again" on a new card brings it back
- * in the same session, "good" graduates it. Relearning step 10m. No fuzz.
+ * FSRS scheduler with Anki's default steps: new cards 1m → 10m, relearning 10m.
+ * Learning cards that are not yet due are shown at the end of a session
+ * (learn-ahead, see buildQueue). No fuzz.
  */
 export function scheduler(desiredRetention: number): FSRS {
   let f = schedulers.get(desiredRetention);
@@ -39,7 +40,7 @@ export function scheduler(desiredRetention: number): FSRS {
         request_retention: desiredRetention,
         enable_fuzz: false,
         enable_short_term: true,
-        learning_steps: ["1m"],
+        learning_steps: ["1m", "10m"],
         relearning_steps: ["10m"],
       }),
     );

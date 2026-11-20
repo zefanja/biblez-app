@@ -72,3 +72,18 @@ export function chunkVerse(text: string, options: ChunkOptions = DEFAULT_CHUNK_O
   }
   return result.length > 0 ? result : [text.trim()];
 }
+
+// ------------------------------------------------------------- manual edits
+
+/** Joins chunk `index` with the following one. */
+export function mergeChunks(chunks: string[], index: number): string[] {
+  if (index < 0 || index >= chunks.length - 1) return chunks;
+  return [...chunks.slice(0, index), `${chunks[index]} ${chunks[index + 1]}`, ...chunks.slice(index + 2)];
+}
+
+/** Splits chunk `index` before word number `wordIndex` (1 … words-1). */
+export function splitChunk(chunks: string[], index: number, wordIndex: number): string[] {
+  const words = (chunks[index] ?? "").split(/\s+/).filter(Boolean);
+  if (wordIndex <= 0 || wordIndex >= words.length) return chunks;
+  return [...chunks.slice(0, index), words.slice(0, wordIndex).join(" "), words.slice(wordIndex).join(" "), ...chunks.slice(index + 1)];
+}

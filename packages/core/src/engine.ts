@@ -201,6 +201,16 @@ export interface Queue {
 
 const LEARN_AHEAD_MS = 20 * 60_000;
 
+/** Stable pseudo-random number per card and day, so the shuffled order does not jump between renders. */
+function dailyRank(cardId: string, day: number): number {
+  let h = 2166136261 ^ day;
+  for (let i = 0; i < cardId.length; i++) {
+    h ^= cardId.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
 export function buildQueue(snapshot: Snapshot, now: number = Date.now(), settings: Settings = DEFAULT_SETTINGS): Queue {
   const todayStart = dayStart(now, settings.dayStartHour);
   const tomorrow = nextDayStart(now, settings.dayStartHour);
@@ -250,7 +260,8 @@ export function buildQueue(snapshot: Snapshot, now: number = Date.now(), setting
   };
   learningNow.sort((a, b) => a.due - b.due);
   learnAhead.sort((a, b) => a.due - b.due);
-  dueReviews.sort((a, b) => a.due - b.due || byOrder(a, b));
+  // Reviews in mixed order (stable for the day); new chunks keep their text order.
+  dueReviews.sort((a, b) => dailyRank(a.card.id, todayStart) - dailyRank(b.card.id, todayStart));
   later.sort((a, b) => a.due - b.due);
   fresh.sort(byOrder);
 

@@ -5,7 +5,7 @@ export * from "./store";
 export * from "./samples";
 export { autoFormatVerses } from "./text/formatter";
 export { parseVerses, type Verse } from "./text/parse";
-export { chunkVerse, DEFAULT_CHUNK_OPTIONS, type ChunkOptions } from "./text/chunk";
+export { chunkVerse, mergeChunks, splitChunk, DEFAULT_CHUNK_OPTIONS, type ChunkOptions } from "./text/chunk";
 export { firstLetters, maskLastLetters, wordCount } from "./text/words";
 export { dayStart, nextDayStart, daysBetween } from "./scheduler/day";
 export { replay, State } from "./scheduler/fsrs";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chunkVerse, firstLetters, maskLastLetters, parseVerses, SAMPLES, wordCount } from "../src";
+import { chunkVerse, firstLetters, maskLastLetters, mergeChunks, parseVerses, SAMPLES, splitChunk, wordCount } from "../src";
 
 describe("hint stages", () => {
   it("masks the last letter like the Anki add-on", () => {
@@ -62,5 +62,21 @@ describe("parseVerses", () => {
   });
   it("treats text without numbers as one verse", () => {
     expect(parseVerses("Seid allezeit fröhlich")).toEqual([{ number: "1", text: "Seid allezeit fröhlich" }]);
+  });
+});
+
+describe("manual chunk edits", () => {
+  const chunks = ["Also hat Gott die Welt geliebt,", "daß er seinen eingebornen Sohn gab,"];
+  it("merges two chunks", () => {
+    expect(mergeChunks(chunks, 0)).toEqual(["Also hat Gott die Welt geliebt, daß er seinen eingebornen Sohn gab,"]);
+    expect(mergeChunks(chunks, 1)).toBe(chunks);
+  });
+  it("splits before a word", () => {
+    expect(splitChunk(chunks, 0, 3)).toEqual(["Also hat Gott", "die Welt geliebt,", "daß er seinen eingebornen Sohn gab,"]);
+    expect(splitChunk(chunks, 0, 0)).toBe(chunks);
+    expect(splitChunk(chunks, 0, 6)).toBe(chunks);
+  });
+  it("split and merge are inverse", () => {
+    expect(mergeChunks(splitChunk(chunks, 1, 2), 1)).toEqual(chunks);
   });
 });

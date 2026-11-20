@@ -62,17 +62,31 @@ Lernverlauf, importiert sie in eine frische Anki-Sammlung mit FSRS und
 vergleicht jede Karte: Zustand, Fälligkeit, Stabilität, Schwierigkeit,
 Verlauf, ausgesetzte Stufen, Duplikate bei erneutem Import.
 
-## iOS und Android (Capacitor)
+## Android
 
-Die Konfiguration liegt in `apps/client/capacitor.config.ts`. Die nativen
-Projekte werden auf einem Rechner mit Xcode bzw. Android Studio erzeugt:
+Das native Projekt liegt in `apps/client/android/` (Capacitor 7, minSdk 23,
+targetSdk 35, App-ID `de.biblez.app`). Voraussetzungen: JDK 21 und das
+Android SDK (Plattform 35, Build-Tools 34/35) – in der Cloud-Umgebung
+„BibleZ" installiert das Setup-Skript beides nach `/opt/android-sdk`.
+
+Debug-APK bauen (Web-Build → `cap sync` → Gradle):
 
 ```bash
-cd apps/client && pnpm build && npx cap add ios && npx cap add android
+pnpm android:apk
 ```
 
+Ergebnis: `apps/client/android/app/build/outputs/apk/debug/app-debug.apk`
+(≈14 MB, mit Debug-Schlüssel signiert, alle sechs Bibelübersetzungen enthalten).
+
+Noch offen: Release-Signatur (Keystore), App-Icon/Splash, natives SQLite statt
+IndexedDB, lokale Erinnerungen, Teilen-Menü für den Anki-Export.
+
+## iOS
+
+Braucht einen Mac mit Xcode:
+
 ```bash
-npx cap sync && npx cap open ios
+cd apps/client && npx cap add ios && npx cap open ios
 ```
 
 ## Bibeltexte

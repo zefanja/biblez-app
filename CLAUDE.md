@@ -12,6 +12,7 @@ pnpm monorepo: `packages/core` (domain logic, no UI) and `apps/client`
 - `pnpm --filter @biblez/core typecheck` / `pnpm --filter @biblez/client typecheck`
 - `pnpm e2e` – builds the client and runs the browser E2E (Chromium via Playwright)
 - `pnpm check` – typecheck + unit tests + E2E in one go
+- `pnpm android:apk` – Android debug APK (JDK 21 + SDK in /opt/android-sdk)
 - `pnpm verify:anki` – checks the .apkg export with the real Anki package (`.venv` with `anki`)
 
 Run `pnpm check` before every commit; add `pnpm verify:anki` for changes to

@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@biblez/core": "workspace:*",
+    "@capacitor/android": "~7.6.10",
     "@capacitor/core": "^7.4.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

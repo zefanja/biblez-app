@@ -13,6 +13,9 @@ importers:
       '@biblez/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@capacitor/android':
+        specifier: ~7.6.10
+        version: 7.6.10(@capacitor/core@7.6.10)
       '@capacitor/core':
         specifier: ^7.4.0
         version: 7.6.10
@@ -160,6 +163,11 @@ packages:
   '@babel/types@7.29.14':
     resolution: {integrity: sha512-UjI/dKmwJwT9pOszJitq2G6EObZPnsZUfdCr92z2TlF3EZK9J3EdfOKUrCzHl6wFthbzwhzl1Soc/UIwxRiq6w==}
     engines: {node: '>=6.9.0'}
+
+  '@capacitor/android@7.6.10':
+    resolution: {integrity: sha512-94DBImYZyDA9RnO5ks3MI/j6rRFs1uK5DR2ft/rBIsvsltDT4w1CSuM8U7vKmKEGRmAfP6vH/woJkBF69fZa4A==}
+    peerDependencies:
+      '@capacitor/core': ^7.6.0
 
   '@capacitor/cli@7.6.10':
     resolution: {integrity: sha512-8S0h44+339hCJyDw0EWqKz4ivR08tzSY35WzSs49pQ4gNOrGiyKpBUaZc08zlJgvN8yfzMY1pi8QfKDsSn1eHg==}
@@ -1467,6 +1475,10 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.14
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@capacitor/android@7.6.10(@capacitor/core@7.6.10)':
+    dependencies:
+      '@capacitor/core': 7.6.10
 
   '@capacitor/cli@7.6.10':
     dependencies:

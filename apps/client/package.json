@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "echo 'client: e2e via pnpm e2e'",
-    "e2e": "playwright test --trace off"
+    "e2e": "node e2e/smoke.mjs"
   },
   "dependencies": {
     "@biblez/core": "workspace:*",

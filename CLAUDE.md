@@ -10,10 +10,12 @@ pnpm monorepo: `packages/core` (domain logic, no UI) and `apps/client`
 - `pnpm bibles` – generate Bible data into `apps/client/public/bibles/` (needed by the app and by some core tests)
 - `pnpm --filter @biblez/core test` – unit tests (Vitest)
 - `pnpm --filter @biblez/core typecheck` / `pnpm --filter @biblez/client typecheck`
-- `pnpm --filter @biblez/client build && node apps/client/e2e/smoke.mjs` – browser E2E (Chromium via Playwright)
-- `pnpm verify:anki` – checks the .apkg export with the real Anki package (`pip install anki`)
+- `pnpm e2e` – builds the client and runs the browser E2E (Chromium via Playwright)
+- `pnpm check` – typecheck + unit tests + E2E in one go
+- `pnpm verify:anki` – checks the .apkg export with the real Anki package (`.venv` with `anki`)
 
-Run all of them before committing changes to scheduling, storage or export.
+Run `pnpm check` before every commit; add `pnpm verify:anki` for changes to
+scheduling, storage or export.
 
 ## Rules
 

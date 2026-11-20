@@ -10,8 +10,10 @@
     "build": "pnpm bibles && pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "verify:anki": "pnpm --filter @biblez/core export:sample && (test -x .venv/bin/python && .venv/bin/python || python3) tools/anki_verify.py packages/core/.out/sample.apkg",
-    "bibles": "pnpm --filter @biblez/core bibles"
+    "verify:anki": "sh tools/verify-anki.sh",
+    "bibles": "pnpm --filter @biblez/core bibles",
+    "e2e": "pnpm --filter @biblez/client build && pnpm --filter @biblez/client e2e",
+    "check": "pnpm -r typecheck && pnpm --filter @biblez/core test && pnpm e2e"
   },
   "repository": {
     "type": "git",

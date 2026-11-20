@@ -42,10 +42,16 @@ pnpm --filter @biblez/core test
 Browser-Test (baut die App und klickt sie in Chromium durch):
 
 ```bash
-pnpm --filter @biblez/client build && node apps/client/e2e/smoke.mjs
+pnpm e2e
 ```
 
-Anki-Kompatibilität (braucht das Python-Paket `anki`, z. B. in `.venv`):
+Alles auf einmal (Typen, Unit-Tests, Browser-Test):
+
+```bash
+pnpm check
+```
+
+Anki-Kompatibilität (einmalig `python3 -m venv .venv && .venv/bin/pip install anki`):
 
 ```bash
 pnpm verify:anki

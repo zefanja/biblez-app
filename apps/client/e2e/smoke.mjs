@@ -1,15 +1,19 @@
 // End-to-end smoke test: drives the built web app in Chromium (phone size).
-// Usage: pnpm build && node e2e/smoke.mjs [screenshotDir]
+// Usage: pnpm --filter @biblez/client build && node apps/client/e2e/smoke.mjs [screenshotDir]
 import { spawn } from "node:child_process";
 import { mkdirSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+import { createServer } from "node:net";
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 
 const shots = process.argv[2];
 if (shots) mkdirSync(shots, { recursive: true });
-const port = 4319;
-const server = spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], { stdio: "pipe", detached: true });
+const port = await new Promise((resolve) => {
+  const srv = createServer().listen(0, () => { const p = srv.address().port; srv.close(() => resolve(p)); });
+});
+const server = spawn("npx", ["vite", "preview", "--port", String(port), "--strictPort"], { stdio: "pipe", detached: true, cwd: fileURLToPath(new URL("..", import.meta.url)) });
 server.stderr.on("data", (d) => process.stderr.write(d));
 for (let i = 0; ; i++) {
   try { if ((await fetch(`http://localhost:${port}/`)).ok) break; } catch {}

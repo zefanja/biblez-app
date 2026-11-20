@@ -30,3 +30,5 @@ scheduling, storage or export.
 - UI copy in German and English (`apps/client/src/i18n.ts`); keep both in sync.
 - Bible texts: only public-domain or licensed translations (see brief §5.1).
 - Never commit keystores (`*.jks`, `keystore.properties`) or their passwords.
+- Storage goes through the async `SqlDriver` (native SQLite / sql.js); group related
+  writes into one `batch` so they are atomic.

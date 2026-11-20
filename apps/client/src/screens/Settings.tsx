@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadTranslations } from "../bible";
 import { useT } from "../i18n";
 import { actions, useApp, type FontSize, type Lang, type Theme } from "../store";
+import { remindersSupported, requestReminderPermission } from "../reminders";
 import { shareFile } from "../share";
 import { Icon, Switch, Toast, useToast } from "../ui";
 
@@ -29,7 +30,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 
 export function SettingsScreen() {
   const t = useT();
-  const { settings, ui, snapshot } = useApp();
+  const { settings, ui, snapshot, dbKind } = useApp();
   const fileInput = useRef<HTMLInputElement>(null);
   const [toast, showToast, hideToast] = useToast();
   const stamp = new Date().toISOString().slice(0, 10);
@@ -37,10 +38,15 @@ export function SettingsScreen() {
   useEffect(() => { loadTranslations().then(setTranslations).catch(() => {}); }, []);
 
   const [busy, setBusy] = useState(false);
-  const share = async (make: () => Blob, filename: string, title: string) => {
+  const toggleReminder = async () => {
+    if (ui.reminder.enabled) return void actions.updateUi({ reminder: { ...ui.reminder, enabled: false } });
+    if ((await requestReminderPermission()) !== "granted") return showToast(t("reminderDenied"));
+    await actions.updateUi({ reminder: { ...ui.reminder, enabled: true, suggested: true } });
+  };
+  const share = async (make: () => Blob | Promise<Blob>, filename: string, title: string) => {
     setBusy(true);
     try {
-      const result = await shareFile(make(), filename, title);
+      const result = await shareFile(await make(), filename, title);
       if (result === "downloaded") showToast(t("fileSaved", { name: filename }));
     } catch {
       showToast(t("shareFailed"));
@@ -48,11 +54,11 @@ export function SettingsScreen() {
       setBusy(false);
     }
   };
-  const exportAnki = () => share(() => actions.exportAnki().blob, `BibleZ-${stamp}.apkg`, t("ankiTitle"));
+  const exportAnki = () => share(async () => (await actions.exportAnki()).blob, `BibleZ-${stamp}.apkg`, t("ankiTitle"));
   const restore = async (file: File) => {
     if (!window.confirm(t("restoreConfirm"))) return;
     try {
-      actions.restore(await file.text());
+      await actions.restore(await file.text());
       showToast(t("restoreDone"));
     } catch {
       showToast(t("restoreFailed"));
@@ -82,6 +88,28 @@ export function SettingsScreen() {
           <Switch on={settings.allStagesAtOnce} />
         </button>
       </div>
+
+      <div className="list">
+        <button className="list-row" onClick={toggleReminder} disabled={!remindersSupported} aria-pressed={ui.reminder.enabled}>
+          {t("reminder")}
+          <Switch on={ui.reminder.enabled} />
+        </button>
+        {ui.reminder.enabled && (
+          <label className="list-row">
+            {t("reminderTime")}
+            <input
+              type="time"
+              value={`${String(ui.reminder.hour).padStart(2, "0")}:${String(ui.reminder.minute).padStart(2, "0")}`}
+              onChange={(e) => {
+                const [h, m] = e.target.value.split(":").map(Number);
+                if (Number.isFinite(h) && Number.isFinite(m)) void actions.updateUi({ reminder: { ...ui.reminder, hour: h!, minute: m! } });
+              }}
+              style={{ border: "none", background: "transparent", fontWeight: 600, fontSize: "1rem", color: "var(--text)" }}
+            />
+          </label>
+        )}
+      </div>
+      <span className="tiny muted" style={{ marginTop: -8 }}>{remindersSupported ? t("reminderHint") : t("reminderWebOnly")}</span>
 
       <span className="label">{t("sAppearance")}</span>
       <div className="stack">
@@ -141,6 +169,7 @@ export function SettingsScreen() {
         <Icon name="lock" size={16} />
         {t("privacy")}
       </div>
+      {dbKind === "native" && <span className="tiny muted center" style={{ marginTop: -10 }}>{t("storageNative")}</span>}
       <span className="tiny muted center">{t("version", { v: APP_VERSION })}</span>
       <Toast message={toast} onDone={hideToast} />
     </>

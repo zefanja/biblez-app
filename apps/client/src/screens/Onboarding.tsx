@@ -1,4 +1,5 @@
 import { SAMPLES, segmentsOf } from "@biblez/core";
+import { useState } from "react";
 import { go } from "../App";
 import { useT } from "../i18n";
 import { actions, useApp } from "../store";
@@ -10,9 +11,12 @@ export function Welcome() {
   const sample = SAMPLES.find((s) => s.language === ui.lang && s.verses.length === 1) ?? SAMPLES[0]!;
   const preview = sample.verses[0]!.text.split(" ").slice(0, 10).join(" ");
 
-  const start = () => {
-    const id = actions.addCollection({ title: sample.title, verses: sample.verses, translation: sample.translation, source: "bundled" });
-    actions.updateUi({ onboarded: true });
+  const [starting, setStarting] = useState(false);
+  const start = async () => {
+    if (starting) return;
+    setStarting(true);
+    const id = await actions.addCollection({ title: sample.title, verses: sample.verses, translation: sample.translation, source: "bundled" });
+    await actions.updateUi({ onboarded: true });
     go(`read/${id}`);
   };
 
@@ -32,8 +36,8 @@ export function Welcome() {
       </div>
       <div className="grow" />
       <div className="stack">
-        <button className="btn primary lg" onClick={start}>{t("startWith", { title: sample.title })}</button>
-        <button className="btn ghost" onClick={() => { actions.updateUi({ onboarded: true }); go("add"); }}>{t("chooseOther")}</button>
+        <button className="btn primary lg" onClick={start} disabled={starting}>{t("startWith", { title: sample.title })}</button>
+        <button className="btn ghost" onClick={async () => { await actions.updateUi({ onboarded: true }); go("add"); }}>{t("chooseOther")}</button>
         <p className="small muted center" style={{ margin: 0 }}>{t("privacyShort")}</p>
       </div>
     </>

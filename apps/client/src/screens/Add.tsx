@@ -88,14 +88,17 @@ export function Add() {
 
   const chooseTranslation = (id: string) => {
     setTranslationId(id);
-    actions.updateUi({ translation: id });
+    void actions.updateUi({ translation: id });
   };
 
-  const create = () => {
+  const [creating, setCreating] = useState(false);
+  const create = async () => {
+    if (creating) return;
+    setCreating(true);
     const id =
       mode === "reference" && translation
-        ? actions.addCollection({ title: collectionTitle, verses, chunks, translation: translation.name, source: "bundled", learnReference })
-        : actions.addCollection({ title: collectionTitle || verses[0]?.text.slice(0, 30) || "?", verses, chunks, source: "custom", learnReference });
+        ? await actions.addCollection({ title: collectionTitle, verses, chunks, translation: translation.name, source: "bundled", learnReference })
+        : await actions.addCollection({ title: collectionTitle || verses[0]?.text.slice(0, 30) || "?", verses, chunks, source: "custom", learnReference });
     go(`read/${id}`, true);
   };
 
@@ -188,7 +191,7 @@ export function Add() {
       )}
       {mode === "text" && <span className="small muted">{t("privateText")}</span>}
       <div className="grow" />
-      <button className="btn primary lg" onClick={create} disabled={verses.length === 0 || duplicate}>{t("create")}</button>
+      <button className="btn primary lg" onClick={create} disabled={creating || verses.length === 0 || duplicate}>{t("create")}</button>
     </>
   );
 }

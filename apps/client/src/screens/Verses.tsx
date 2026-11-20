@@ -65,9 +65,9 @@ export function CollectionDetail({ collectionId }: { collectionId: string }) {
   const progress = collectionProgress(snapshot, collectionId, Date.now(), settings);
   const segments = segmentsOf(snapshot, collectionId);
 
-  const remove = () => {
+  const remove = async () => {
     if (window.confirm(t("deleteConfirm", { title: collection.title }))) {
-      actions.deleteCollection(collectionId);
+      await actions.deleteCollection(collectionId);
       go("verses", true);
     }
   };

@@ -6,10 +6,22 @@ import { DEFAULT_SETTINGS, type Card, type Collection, type Review, type Segment
 
 export type SqlValue = string | number | null;
 
-export interface SqlDriver {
-  run(sql: string, params?: SqlValue[]): void;
-  all<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): T[];
+export interface Statement {
+  sql: string;
+  params?: SqlValue[];
 }
+
+/**
+ * Asynchronous so that native plugins (one bridge call per operation) fit.
+ * `batch` runs all statements in one transaction: all or nothing.
+ */
+export interface SqlDriver {
+  run(sql: string, params?: SqlValue[]): Promise<void>;
+  all<T = Record<string, SqlValue>>(sql: string, params?: SqlValue[]): Promise<T[]>;
+  batch(statements: Statement[]): Promise<void>;
+}
+
+const st = (sql: string, params: SqlValue[] = []): Statement => ({ sql, params });
 
 export const SCHEMA_VERSION = 1;
 
@@ -24,79 +36,98 @@ const SCHEMA = [
   `CREATE INDEX IF NOT EXISTS ix_review_card ON review(card_id)`,
 ];
 
-export function initSchema(db: SqlDriver): void {
-  db.run("PRAGMA foreign_keys = ON");
-  for (const stmt of SCHEMA) db.run(stmt);
-  db.run("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)", [String(SCHEMA_VERSION)]);
+export async function initSchema(db: SqlDriver): Promise<void> {
+  await db.run("PRAGMA foreign_keys = ON");
+  await db.batch([
+    ...SCHEMA.map((sql) => st(sql)),
+    st("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)", [String(SCHEMA_VERSION)]),
+  ]);
 }
 
 type Row = Record<string, SqlValue>;
-const num = (v: SqlValue) => Number(v);
-const optNum = (v: SqlValue) => (v === null ? null : Number(v));
+const num = (v: SqlValue | undefined) => Number(v);
+const optNum = (v: SqlValue | undefined) => (v === null || v === undefined ? null : Number(v));
 
-export function loadSnapshot(db: SqlDriver): Snapshot {
+export async function loadSnapshot(db: SqlDriver): Promise<Snapshot> {
   const snap = emptySnapshot();
-  snap.collections = db.all<Row>("SELECT * FROM collection ORDER BY created_at").map((r) => ({
+  const [collections, segments, cards, reviews] = await Promise.all([
+    db.all<Row>("SELECT * FROM collection ORDER BY created_at"),
+    db.all<Row>("SELECT * FROM segment ORDER BY collection_id, position"),
+    db.all<Row>("SELECT * FROM card"),
+    db.all<Row>("SELECT * FROM review ORDER BY reviewed_at"),
+  ]);
+  snap.collections = collections.map((r) => ({
     id: String(r.id), title: String(r.title), kind: r.kind === "verse" ? "verse" : "passage",
-    translation: r.translation === null ? null : String(r.translation), source: r.source === "bundled" ? "bundled" : "custom",
-    learnReference: num(r.learn_reference!) === 1, createdAt: num(r.created_at!), ankiDeckId: num(r.anki_deck_id!),
+    translation: r.translation === null || r.translation === undefined ? null : String(r.translation), source: r.source === "bundled" ? "bundled" : "custom",
+    learnReference: num(r.learn_reference) === 1, createdAt: num(r.created_at), ankiDeckId: num(r.anki_deck_id),
   }));
-  snap.segments = db.all<Row>("SELECT * FROM segment ORDER BY collection_id, position").map((r) => ({
-    id: String(r.id), collectionId: String(r.collection_id), position: num(r.position!), verseNumber: String(r.verse_number),
-    part: String(r.part), text: String(r.text), ankiNoteId: num(r.anki_note_id!), ankiGuid: String(r.anki_guid),
+  snap.segments = segments.map((r) => ({
+    id: String(r.id), collectionId: String(r.collection_id), position: num(r.position), verseNumber: String(r.verse_number),
+    part: String(r.part), text: String(r.text), ankiNoteId: num(r.anki_note_id), ankiGuid: String(r.anki_guid),
   }));
-  snap.cards = db.all<Row>("SELECT * FROM card").map((r) => ({
-    id: String(r.id), segmentId: String(r.segment_id), stage: num(r.stage!) as Card["stage"], ankiCardId: num(r.anki_card_id!),
-    unlockedAt: optNum(r.unlocked_at!), retiredAt: optNum(r.retired_at!),
+  snap.cards = cards.map((r) => ({
+    id: String(r.id), segmentId: String(r.segment_id), stage: num(r.stage) as Card["stage"], ankiCardId: num(r.anki_card_id),
+    unlockedAt: optNum(r.unlocked_at), retiredAt: optNum(r.retired_at),
   }));
-  snap.reviews = db.all<Row>("SELECT * FROM review ORDER BY reviewed_at").map((r) => ({
-    id: String(r.id), cardId: String(r.card_id), reviewedAt: num(r.reviewed_at!), rating: r.rating === "again" ? "again" : "good",
-    durationMs: num(r.duration_ms!),
+  snap.reviews = reviews.map((r) => ({
+    id: String(r.id), cardId: String(r.card_id), reviewedAt: num(r.reviewed_at), rating: r.rating === "again" ? "again" : "good",
+    durationMs: num(r.duration_ms),
   }));
   return snap;
 }
 
-export function saveCollection(db: SqlDriver, created: CreatedCollection): void {
+function collectionStatements(created: CreatedCollection): Statement[] {
   const c: Collection = created.collection;
-  db.run("INSERT INTO collection VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [c.id, c.title, c.kind, c.translation, c.source, c.learnReference ? 1 : 0, c.createdAt, c.ankiDeckId]);
-  for (const s of created.segments) saveSegment(db, s);
-  saveCards(db, created.cards);
+  return [
+    st("INSERT INTO collection VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [c.id, c.title, c.kind, c.translation, c.source, c.learnReference ? 1 : 0, c.createdAt, c.ankiDeckId]),
+    ...created.segments.map((s: Segment) =>
+      st("INSERT INTO segment VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [s.id, s.collectionId, s.position, s.verseNumber, s.part, s.text, s.ankiNoteId, s.ankiGuid])),
+    ...cardStatements(created.cards),
+  ];
 }
 
-function saveSegment(db: SqlDriver, s: Segment): void {
-  db.run("INSERT INTO segment VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [s.id, s.collectionId, s.position, s.verseNumber, s.part, s.text, s.ankiNoteId, s.ankiGuid]);
+const cardStatements = (cards: Card[]) =>
+  cards.map((k) => st("INSERT OR REPLACE INTO card VALUES (?, ?, ?, ?, ?, ?)", [k.id, k.segmentId, k.stage, k.ankiCardId, k.unlockedAt, k.retiredAt]));
+const reviewStatement = (r: Review) => st("INSERT INTO review VALUES (?, ?, ?, ?, ?)", [r.id, r.cardId, r.reviewedAt, r.rating, r.durationMs]);
+
+export async function saveCollection(db: SqlDriver, created: CreatedCollection): Promise<void> {
+  await db.batch(collectionStatements(created));
 }
 
-export function saveCards(db: SqlDriver, cards: Card[]): void {
-  for (const k of cards) {
-    db.run("INSERT OR REPLACE INTO card VALUES (?, ?, ?, ?, ?, ?)", [k.id, k.segmentId, k.stage, k.ankiCardId, k.unlockedAt, k.retiredAt]);
-  }
+export async function saveCards(db: SqlDriver, cards: Card[]): Promise<void> {
+  if (cards.length) await db.batch(cardStatements(cards));
 }
 
-export function saveReview(db: SqlDriver, r: Review): void {
-  db.run("INSERT INTO review VALUES (?, ?, ?, ?, ?)", [r.id, r.cardId, r.reviewedAt, r.rating, r.durationMs]);
+/** Stores a review together with the cards it changed (unlock/retire) atomically. */
+export async function saveReview(db: SqlDriver, r: Review, changedCards: Card[] = []): Promise<void> {
+  await db.batch([reviewStatement(r), ...cardStatements(changedCards)]);
 }
 
-export function deleteCollection(db: SqlDriver, collectionId: string): void {
-  db.run("DELETE FROM review WHERE card_id IN (SELECT card.id FROM card JOIN segment ON segment.id = card.segment_id WHERE segment.collection_id = ?)", [collectionId]);
-  db.run("DELETE FROM card WHERE segment_id IN (SELECT id FROM segment WHERE collection_id = ?)", [collectionId]);
-  db.run("DELETE FROM segment WHERE collection_id = ?", [collectionId]);
-  db.run("DELETE FROM collection WHERE id = ?", [collectionId]);
+export async function deleteCollection(db: SqlDriver, collectionId: string): Promise<void> {
+  await db.batch([
+    st("DELETE FROM review WHERE card_id IN (SELECT card.id FROM card JOIN segment ON segment.id = card.segment_id WHERE segment.collection_id = ?)", [collectionId]),
+    st("DELETE FROM card WHERE segment_id IN (SELECT id FROM segment WHERE collection_id = ?)", [collectionId]),
+    st("DELETE FROM segment WHERE collection_id = ?", [collectionId]),
+    st("DELETE FROM collection WHERE id = ?", [collectionId]),
+  ]);
 }
 
-export function loadSettings(db: SqlDriver): Settings {
-  const row = db.all<{ value: string }>("SELECT value FROM meta WHERE key = 'settings'")[0];
-  if (!row) return { ...DEFAULT_SETTINGS };
+export async function loadMeta<T>(db: SqlDriver, key: string, fallback: T): Promise<T> {
+  const row = (await db.all<{ value: string }>("SELECT value FROM meta WHERE key = ?", [key]))[0];
+  if (!row) return fallback;
   try {
-    return { ...DEFAULT_SETTINGS, ...(JSON.parse(row.value) as Partial<Settings>) };
+    return { ...fallback, ...(JSON.parse(row.value) as Partial<T>) };
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return fallback;
   }
 }
 
-export function saveSettings(db: SqlDriver, settings: Settings): void {
-  db.run("INSERT OR REPLACE INTO meta (key, value) VALUES ('settings', ?)", [JSON.stringify(settings)]);
+export async function saveMeta(db: SqlDriver, key: string, value: unknown): Promise<void> {
+  await db.run("INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", [key, JSON.stringify(value)]);
 }
+
+export const loadSettings = (db: SqlDriver): Promise<Settings> => loadMeta(db, "settings", { ...DEFAULT_SETTINGS });
+export const saveSettings = (db: SqlDriver, settings: Settings): Promise<void> => saveMeta(db, "settings", settings);
 
 // ------------------------------------------------------------------ backup
 
@@ -118,20 +149,28 @@ export function parseBackup(json: string): Backup {
   return data as Backup;
 }
 
-/** Replaces all data with the backup's content. */
-export function restoreBackup(db: SqlDriver, backup: Backup): void {
-  db.run("DELETE FROM review");
-  db.run("DELETE FROM card");
-  db.run("DELETE FROM segment");
-  db.run("DELETE FROM collection");
+/** Replaces all data with the backup's content (one transaction). */
+export async function restoreBackup(db: SqlDriver, backup: Backup): Promise<void> {
   const snap = backup.snapshot;
-  for (const c of snap.collections) {
-    saveCollection(db, {
-      collection: c,
-      segments: snap.segments.filter((s) => s.collectionId === c.id),
-      cards: snap.cards.filter((k) => snap.segments.some((s) => s.id === k.segmentId && s.collectionId === c.id)),
-    });
-  }
-  for (const r of snap.reviews) saveReview(db, r);
-  saveSettings(db, { ...DEFAULT_SETTINGS, ...backup.settings });
+  const segOf = new Map(snap.segments.map((s) => [s.id, s.collectionId]));
+  await db.batch([
+    st("DELETE FROM review"),
+    st("DELETE FROM card"),
+    st("DELETE FROM segment"),
+    st("DELETE FROM collection"),
+    ...snap.collections.flatMap((c) =>
+      collectionStatements({
+        collection: c,
+        segments: snap.segments.filter((s) => s.collectionId === c.id),
+        cards: snap.cards.filter((k) => segOf.get(k.segmentId) === c.id),
+      })),
+    ...snap.reviews.map(reviewStatement),
+    st("INSERT OR REPLACE INTO meta (key, value) VALUES ('settings', ?)", [JSON.stringify({ ...DEFAULT_SETTINGS, ...backup.settings })]),
+  ]);
+}
+
+/** True when the database holds no collections (used for one-time migrations). */
+export async function isEmpty(db: SqlDriver): Promise<boolean> {
+  const rows = await db.all<{ n: number }>("SELECT COUNT(*) AS n FROM collection");
+  return Number(rows[0]?.n ?? 0) === 0;
 }

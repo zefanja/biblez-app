@@ -1,19 +1,26 @@
-// App state: a sql.js SQLite database (same schema as on mobile), persisted
-// to IndexedDB after every change. Components subscribe via useApp().
+// App state. The database (native SQLite on the phone, sql.js + IndexedDB on
+// the web, see db.ts) is the source of truth; the in-memory snapshot mirrors it
+// so the UI stays fast. Components subscribe via useApp().
 
-import initSqlJs, { type Database } from "sql.js";
-import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 import { useSyncExternalStore } from "react";
 import {
-  applyReview, createCollection, deleteCollection, exportApkg, initSchema, loadSettings, loadSnapshot,
-  makeBackup, parseBackup, reactivate, restoreBackup, saveCards, saveCollection, saveReview, saveSettings,
-  type Card, type NewCollectionInput, type Rating, type ReviewResult, type Settings, type Snapshot,
-  type SqlDriver, type SqlValue,
+  applyReview, createCollection, DEFAULT_SETTINGS, deleteCollection, exportApkg, loadMeta, loadSettings, loadSnapshot,
+  makeBackup, parseBackup, reactivate, restoreBackup, saveCards, saveCollection, saveMeta, saveReview, saveSettings,
+  type Card, type NewCollectionInput, type Rating, type ReviewResult, type Settings, type Snapshot, type SqlDriver,
 } from "@biblez/core";
+import { getSqlJs, openDatabase, type DbKind } from "./db";
 
 export type Theme = "auto" | "light" | "dark";
 export type FontSize = "s" | "m" | "l";
 export type Lang = "de" | "en";
+
+export interface ReminderPrefs {
+  enabled: boolean;
+  hour: number;
+  minute: number;
+  /** The suggestion on the "done" screen was dismissed or accepted. */
+  suggested: boolean;
+}
 
 export interface UiPrefs {
   onboarded: boolean;
@@ -22,11 +29,13 @@ export interface UiPrefs {
   lang: Lang;
   /** Last translation chosen when adding a passage. */
   translation?: string;
+  reminder: ReminderPrefs;
 }
 
 export interface AppState {
   ready: boolean;
   error: string | null;
+  dbKind: DbKind | null;
   snapshot: Snapshot;
   settings: Settings;
   ui: UiPrefs;
@@ -34,176 +43,138 @@ export interface AppState {
   version: number;
 }
 
-const DB_NAME = "biblez";
-const STORE = "kv";
-const KEY = "collection.sqlite";
-
-let idbConn: Promise<IDBDatabase> | null = null;
-function idbOpen(): Promise<IDBDatabase> {
-  idbConn ??= new Promise((resolve, reject) => {
-    const open = indexedDB.open(DB_NAME, 1);
-    open.onupgradeneeded = () => open.result.createObjectStore(STORE);
-    open.onerror = () => reject(open.error);
-    open.onsuccess = () => resolve(open.result);
-  });
-  return idbConn;
-}
-
-/** Runs one request and resolves only once its transaction has committed. */
-async function idb<T>(mode: IDBTransactionMode, fn: (s: IDBObjectStore) => IDBRequest<T>): Promise<T> {
-  const conn = await idbOpen();
-  return new Promise((resolve, reject) => {
-    const tx = conn.transaction(STORE, mode, { durability: "strict" } as IDBTransactionOptions);
-    const req = fn(tx.objectStore(STORE));
-    tx.oncomplete = () => resolve(req.result);
-    tx.onerror = () => reject(tx.error);
-    tx.onabort = () => reject(tx.error);
-  });
-}
-
 function defaultLang(): Lang {
   return typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("de") ? "de" : "en";
 }
 
-let SQL: initSqlJs.SqlJsStatic | null = null;
-let db: Database | null = null;
+const DEFAULT_UI: UiPrefs = {
+  onboarded: false,
+  theme: "auto",
+  fontSize: "m",
+  lang: defaultLang(),
+  reminder: { enabled: false, hour: 19, minute: 0, suggested: false },
+};
+
 let driver: SqlDriver | null = null;
+let flushDb: () => Promise<void> = async () => undefined;
 let state: AppState = {
   ready: false,
   error: null,
+  dbKind: null,
   snapshot: { collections: [], segments: [], cards: [], reviews: [] },
-  settings: loadSettingsFallback(),
-  ui: { onboarded: false, theme: "auto", fontSize: "m", lang: defaultLang() },
+  settings: { ...DEFAULT_SETTINGS },
+  ui: DEFAULT_UI,
   version: 0,
 };
-function loadSettingsFallback(): Settings {
-  return { newSegmentsPerDay: 5, desiredRetention: 0.9, unlockStabilityDays: 7, safeStabilityDays: 21, dayStartHour: 4, allStagesAtOnce: false };
-}
 
 const listeners = new Set<() => void>();
-function emit(patch: Partial<AppState>) {
+const changeHooks = new Set<(s: AppState) => void>();
+
+function emit(patch: Partial<AppState>, notifyHooks = true) {
   state = { ...state, ...patch, version: state.version + 1 };
   listeners.forEach((l) => l());
+  if (notifyHooks) changeHooks.forEach((h) => h(state));
 }
 
-// Writes are coalesced (one per task) and strictly sequential, so an older
-// snapshot can never overwrite a newer one.
-let dirty = false;
-let writing: Promise<void> = Promise.resolve();
-function persist() {
-  if (dirty) return;
-  dirty = true;
-  queueMicrotask(() => {
-    writing = writing.then(async () => {
-      if (!db || !dirty) return;
-      dirty = false;
-      const bytes = db.export();
-      await idb("readwrite", (s) => s.put(bytes, KEY));
-    }).catch((e) => console.error("persist failed", e));
-  });
+/** Called after data or preference changes (used to reschedule reminders). */
+export function onDataChange(hook: (s: AppState) => void): () => void {
+  changeHooks.add(hook);
+  return () => changeHooks.delete(hook);
 }
 
-/** Resolves when every pending change is stored (used before export/reload in tests). */
-export function flush(): Promise<void> {
-  return writing;
+function db(): SqlDriver {
+  if (!driver) throw new Error("store not ready");
+  return driver;
 }
 
-function makeDriver(d: Database): SqlDriver {
-  return {
-    run: (sql, params = []) => void d.run(sql, params),
-    all: <T,>(sql: string, params: SqlValue[] = []) => {
-      const res = d.exec(sql, params)[0];
-      if (!res) return [] as T[];
-      return res.values.map((row) => Object.fromEntries(res.columns.map((c, i) => [c, row[i] ?? null]))) as T[];
-    },
-  };
-}
+const cloneSnapshot = (s: Snapshot): Snapshot => ({
+  collections: s.collections.map((c) => ({ ...c })),
+  segments: s.segments.map((x) => ({ ...x })),
+  cards: s.cards.map((k) => ({ ...k })),
+  reviews: [...s.reviews],
+});
 
-function loadUi(d: SqlDriver): UiPrefs {
-  const row = d.all<{ value: string }>("SELECT value FROM meta WHERE key = 'ui'")[0];
-  const base: UiPrefs = { onboarded: false, theme: "auto", fontSize: "m", lang: defaultLang() };
-  if (!row) return base;
-  try {
-    return { ...base, ...(JSON.parse(row.value) as Partial<UiPrefs>) };
-  } catch {
-    return base;
-  }
+/** Reloads everything from the database (after bulk changes or an error). */
+async function reload() {
+  emit({ snapshot: await loadSnapshot(db()), settings: await loadSettings(db()) });
 }
 
 export async function initStore(): Promise<void> {
   try {
-    SQL = await initSqlJs({ locateFile: () => wasmUrl, useOldExtensionFunctions: false });
-    let bytes: Uint8Array | undefined;
-    try {
-      bytes = await idb<Uint8Array | undefined>("readonly", (s) => s.get(KEY) as IDBRequest<Uint8Array | undefined>);
-    } catch (e) {
-      console.warn("IndexedDB unavailable, data will not persist", e);
-    }
-    db = bytes ? new SQL.Database(bytes) : new SQL.Database();
-    driver = makeDriver(db);
-    initSchema(driver);
-    emit({ ready: true, snapshot: loadSnapshot(driver), settings: loadSettings(driver), ui: loadUi(driver) });
+    const opened = await openDatabase();
+    driver = opened.driver;
+    flushDb = opened.flush;
+    const stored = await loadMeta<Partial<UiPrefs>>(driver, "ui", {});
+    const ui: UiPrefs = { ...DEFAULT_UI, ...stored, reminder: { ...DEFAULT_UI.reminder, ...(stored.reminder ?? {}) } };
+    emit({ ready: true, dbKind: opened.kind, snapshot: await loadSnapshot(driver), settings: await loadSettings(driver), ui });
   } catch (e) {
     emit({ ready: true, error: String(e) });
   }
 }
 
-function d(): SqlDriver {
-  if (!driver) throw new Error("store not ready");
-  return driver;
-}
-
-/** Re-reads everything from SQLite (cheap at this size) and notifies. */
-function refresh() {
-  emit({ snapshot: loadSnapshot(d()), settings: loadSettings(d()) });
-  persist();
-}
-
 export const actions = {
-  addCollection(input: NewCollectionInput): string {
+  async addCollection(input: NewCollectionInput): Promise<string> {
     const created = createCollection(input, Date.now(), state.settings);
-    saveCollection(d(), created);
-    refresh();
+    await saveCollection(db(), created);
+    const snapshot = cloneSnapshot(state.snapshot);
+    snapshot.collections.push(created.collection);
+    snapshot.segments.push(...created.segments);
+    snapshot.cards.push(...created.cards);
+    emit({ snapshot });
     return created.collection.id;
   },
-  review(cardId: string, rating: Rating, durationMs: number): ReviewResult {
-    const snap = loadSnapshot(d());
-    const result = applyReview(snap, cardId, rating, Date.now(), durationMs, state.settings);
-    saveReview(d(), result.review);
-    saveCards(d(), result.changedCards);
-    refresh();
+
+  async review(cardId: string, rating: Rating, durationMs: number): Promise<ReviewResult> {
+    const snapshot = cloneSnapshot(state.snapshot);
+    const result = applyReview(snapshot, cardId, rating, Date.now(), durationMs, state.settings);
+    try {
+      await saveReview(db(), result.review, result.changedCards);
+    } catch (e) {
+      await reload();
+      throw e;
+    }
+    emit({ snapshot });
     return result;
   },
-  reactivate(card: Card) {
-    saveCards(d(), [reactivate({ ...card })]);
-    refresh();
+
+  async reactivate(card: Card) {
+    await saveCards(db(), [reactivate({ ...card })]);
+    await reload();
   },
-  deleteCollection(id: string) {
-    deleteCollection(d(), id);
-    refresh();
+
+  async deleteCollection(id: string) {
+    await deleteCollection(db(), id);
+    await reload();
   },
-  updateSettings(patch: Partial<Settings>) {
-    saveSettings(d(), { ...state.settings, ...patch });
-    refresh();
+
+  async updateSettings(patch: Partial<Settings>) {
+    const settings = { ...state.settings, ...patch };
+    await saveSettings(db(), settings);
+    emit({ settings });
   },
-  updateUi(patch: Partial<UiPrefs>) {
+
+  async updateUi(patch: Partial<UiPrefs>) {
     const ui = { ...state.ui, ...patch };
-    d().run("INSERT OR REPLACE INTO meta (key, value) VALUES ('ui', ?)", [JSON.stringify(ui)]);
+    await saveMeta(db(), "ui", ui);
     emit({ ui });
-    persist();
   },
-  exportAnki(): { blob: Blob; notes: number; reviews: number } {
-    if (!SQL) throw new Error("store not ready");
-    const res = exportApkg(SQL, state.snapshot, { settings: state.settings });
+
+  async exportAnki(): Promise<{ blob: Blob; notes: number; reviews: number }> {
+    const res = exportApkg(await getSqlJs(), state.snapshot, { settings: state.settings });
     return { blob: new Blob([res.bytes as BlobPart], { type: "application/octet-stream" }), notes: res.noteCount, reviews: res.reviewCount };
   },
+
   backup(): Blob {
     return new Blob([JSON.stringify(makeBackup(state.snapshot, state.settings))], { type: "application/json" });
   },
-  restore(json: string) {
-    restoreBackup(d(), parseBackup(json));
-    refresh();
+
+  async restore(json: string) {
+    await restoreBackup(db(), parseBackup(json));
+    await reload();
   },
+
+  /** Resolves when every change is stored durably (web: IndexedDB write finished). */
+  flush: () => flushDb(),
 };
 
 export function useApp(): AppState {

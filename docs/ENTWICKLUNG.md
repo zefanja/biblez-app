@@ -114,7 +114,30 @@ Anki-Export und Backup öffnen in der App das System-Teilen-Menü
 dort direkt an AnkiDroid, Drive, Mail … Im mobilen Browser wird die Web
 Share API genutzt, am Desktop heruntergeladen (`apps/client/src/share.ts`).
 
-Noch offen: natives SQLite statt IndexedDB, lokale Erinnerungen.
+### Speicher
+
+| Plattform | Datenbank | Code |
+|-----------|-----------|------|
+| Android/iOS | natives SQLite (`@capacitor-community/sqlite`), Datei im privaten App-Speicher | `capacitorSqliteDriver` |
+| Web | SQLite via sql.js im Speicher, nach jeder Änderung in IndexedDB | `sqlJsDriver` |
+
+Beide hinter der asynchronen `SqlDriver`-Schnittstelle (`packages/core/src/store.ts`);
+mehrere Schreibvorgänge laufen gebündelt in **einer** Transaktion (`batch`), z. B.
+Wiederholung + Stufenwechsel oder eine ganze neue Sammlung (ein Bridge-Aufruf).
+Daten aus einer früheren App-Version (IndexedDB im WebView) werden beim
+ersten Start einmalig in die native Datenbank übernommen.
+
+Die Biometrie-Berechtigungen des SQLite-Plugins werden im Manifest entfernt
+(`tools:node="remove"`), weil BibleZ keine verschlüsselte Datenbank nutzt.
+
+### Erinnerungen
+
+Lokale Benachrichtigungen (`@capacitor/local-notifications`), nur in der App.
+`planReminders()` (core) plant die nächsten 7 Tage einzeln zur gewählten
+Uhrzeit, jeweils mit dem, was an dem Tag ansteht – Tage ohne Fälliges bleiben
+still. Nach jeder Änderung (Wiederholung, neue Sammlung, Einstellungen) wird
+neu geplant (`apps/client/src/reminders.ts`). Kanal „Tägliche Erinnerung“,
+Statusleisten-Icon `ic_stat_biblez` (aus `design/icon/icon-notification.svg`).
 
 ## App-Icon
 

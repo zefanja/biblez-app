@@ -1,7 +1,7 @@
 // Renders the master SVGs in design/icon/ into every icon the apps need.
 // Usage: node tools/generate-icons.mjs   (uses Playwright's Chromium)
 //
-// Android: launcher (legacy, round, adaptive foreground, monochrome), splash screens
+// Android: launcher (legacy, round, adaptive foreground, monochrome), notification icon, splash screens
 // Web:     favicon, apple-touch-icon, PWA icons (any + maskable)
 // Stores:  Play Store 512, iOS App Store 1024 (design/icon/out/)
 
@@ -48,6 +48,10 @@ for (const [d, f] of Object.entries(densities)) {
   await render("icon-maskable.svg", join(dir, "ic_launcher_round.png"), { w: 48 * f, shape: "circle" });
   await render("icon-foreground.svg", join(dir, "ic_launcher_foreground.png"), { w: 108 * f });
   await render("icon-monochrome.svg", join(dir, "ic_launcher_monochrome.png"), { w: 108 * f });
+}
+// status bar icon for notifications (24dp, white silhouette)
+for (const [d, f] of Object.entries(densities)) {
+  await render("icon-notification.svg", join(res, `drawable-${d}`, "ic_stat_biblez.png"), { w: 24 * f });
 }
 const adaptive = `<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">

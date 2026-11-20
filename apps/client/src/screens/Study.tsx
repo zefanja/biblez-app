@@ -2,6 +2,7 @@ import { buildQueue, cardFace, fallbackCandidate, overview, type Card, type Card
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { go } from "../App";
 import { useT } from "../i18n";
+import { remindersSupported, requestReminderPermission } from "../reminders";
 import { actions, getState, useApp } from "../store";
 import { Icon, StageDots, Toast, useToast } from "../ui";
 
@@ -40,14 +41,22 @@ export function Study({ collectionId }: { collectionId?: string }) {
     shownAt.current = Date.now();
   }, [collectionId]);
 
+  const saving = useRef(false);
   const rate = useCallback(
-    (rating: "again" | "good") => {
-      if (!current) return;
-      const result = actions.review(current.id, rating, Date.now() - shownAt.current);
-      setAnswered((a) => a + 1);
-      if (result.unlockedStage) showToast(t("unlocked", { n: result.unlockedStage }));
-      setFallback(rating === "again" ? fallbackCandidate(getState().snapshot, current.id) : null);
-      advance();
+    async (rating: "again" | "good") => {
+      if (!current || saving.current) return;
+      saving.current = true;
+      try {
+        const result = await actions.review(current.id, rating, Date.now() - shownAt.current);
+        setAnswered((a) => a + 1);
+        if (result.unlockedStage) showToast(t("unlocked", { n: result.unlockedStage }));
+        setFallback(rating === "again" ? fallbackCandidate(getState().snapshot, current.id) : null);
+        advance();
+      } catch {
+        showToast(t("saveFailed"));
+      } finally {
+        saving.current = false;
+      }
     },
     [current, advance, showToast, t],
   );
@@ -59,10 +68,10 @@ export function Study({ collectionId }: { collectionId?: string }) {
       if (!revealed && (e.key === " " || e.key === "Enter")) {
         e.preventDefault();
         setRevealed(true);
-      } else if (revealed && e.key === "1") rate("again");
+      } else if (revealed && e.key === "1") void rate("again");
       else if (revealed && (e.key === "2" || e.key === " " || e.key === "Enter")) {
         e.preventDefault();
-        rate("good");
+        void rate("good");
       }
     };
     window.addEventListener("keydown", onKey);
@@ -98,7 +107,7 @@ export function Study({ collectionId }: { collectionId?: string }) {
       {fallback && (
         <div className="tip" style={{ alignItems: "center" }}>
           <span style={{ flex: 1 }}>{t("fallbackOffer", { n: fallback.stage })}</span>
-          <button className="btn soft" style={{ minHeight: 40 }} onClick={() => { actions.reactivate(fallback); setFallback(null); }}>
+          <button className="btn soft" style={{ minHeight: 40 }} onClick={() => { void actions.reactivate(fallback); setFallback(null); }}>
             {t("fallbackAccept")}
           </button>
         </div>
@@ -166,9 +175,37 @@ function Done({ answered, later }: { answered: number; later: number }) {
         </div>
       </div>
       {later > 0 && <div className="tip"><Icon name="info" size={20} /><span>{t("later", { n: later })} {t("waitOrLeave")}</span></div>}
+      <ReminderSuggestion />
       <p className="muted center small" style={{ margin: 0, lineHeight: 1.55 }}>{t("doneExplain")}</p>
       <div className="grow" />
       <button className="btn primary lg" onClick={() => go("", true)}>{t("toHome")}</button>
     </>
+  );
+}
+
+/** One-time offer on the "done" screen (native app only). */
+function ReminderSuggestion() {
+  const t = useT();
+  const { ui } = useApp();
+  const [denied, setDenied] = useState(false);
+  if (!remindersSupported) return null;
+  const time = `${String(ui.reminder.hour).padStart(2, "0")}:${String(ui.reminder.minute).padStart(2, "0")}`;
+  if (ui.reminder.enabled) {
+    return ui.reminder.suggested ? (
+      <div className="tip" style={{ justifyContent: "center", fontWeight: 600 }}><Icon name="check" size={18} />{t("reminderSet", { time })}</div>
+    ) : null;
+  }
+  if (ui.reminder.suggested) return null;
+  const enable = async () => {
+    if ((await requestReminderPermission()) !== "granted") {
+      setDenied(true);
+      return;
+    }
+    await actions.updateUi({ reminder: { ...ui.reminder, enabled: true, suggested: true } });
+  };
+  return denied ? (
+    <div className="warn"><Icon name="info" size={18} /><span>{t("reminderDenied")}</span></div>
+  ) : (
+    <button className="btn secondary" onClick={enable}>{t("reminderSuggest")}</button>
   );
 }

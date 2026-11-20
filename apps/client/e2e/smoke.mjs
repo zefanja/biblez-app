@@ -124,6 +124,9 @@ try {
   await shot("09-recite"); step("recite screen");
 
   await page.goto(`http://localhost:${port}/#/settings`);
+  await page.getByText("Erinnerungen gibt es in der App für Android und iOS.").waitFor();
+  if (!(await page.getByRole("button", { name: /Tägliche Erinnerung/ }).isDisabled())) throw new Error("reminder toggle should be disabled on the web");
+  step("web: reminder toggle disabled with hint");
   const stats = await page.getByText(/Abschnitte · \d+ Wiederholungen/).textContent();
   if (!/· 11 Wiederholungen/.test(stats ?? "")) throw new Error(`reviews not persisted: ${stats}`);
   step(`learning history survived reload (${stats})`);

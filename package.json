@@ -1,0 +1,15 @@
+{
+  "name": "biblez",
+  "private": true,
+  "version": "0.1.0",
+  "description": "BibleZ – Bibelverse auswendig lernen (Web, iOS, Android)",
+  "license": "MIT",
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter @biblez/client dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "verify:anki": "pnpm --filter @biblez/core export:sample && python3 tools/anki_verify.py packages/core/.out/sample.apkg"
+  }
+}

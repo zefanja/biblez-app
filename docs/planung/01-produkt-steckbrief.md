@@ -1,6 +1,6 @@
 # Bible Memorizer App – Produkt-Steckbrief
 
-Status: **Entwurf v0.4** · Stand: 2026-11-20
+Status: **v0.5** (Planung abgeschlossen, Umsetzung begonnen) · Stand: 2026-11-20
 
 Dieses Dokument hält die bisherigen Entscheidungen fest, leitet daraus das
 Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen.
@@ -33,6 +33,8 @@ Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen
 | E20 | Stufen | **Eine Stufe nach der anderen**, keine Geschwister am selben Tag (4.3) |
 | E21 | Lizenz | **MIT** bestätigt |
 | E22 | Dunkelmodus, Schriftgröße | **In v1** |
+| E23 | Übersichtstabelle | **Entfällt** (keine Option beim Anlegen; Card 3 wird nie erzeugt) |
+| E24 | Noch gesperrte Stufen im Export | als **neue** Karten (Anki führt sie nach seinen eigenen Regeln ein) |
 
 ---
 
@@ -87,7 +89,6 @@ dazu, nicht als neue Karte. So bleibt der Export immer verlustfrei.
 | 1 | Wortenden ausgeblendet | Kontext + `Im Anfan_ wa_ da_ Wor_` | Card 1 |
 | 2 | Anfangsbuchstaben | Kontext + `I A w d W` | Card 2 |
 | 3 | Nur Kontext / Stelle | Kontext (vorherige Verse) bzw. bei Einzelversen nur die Stelle | Card 4 |
-| (opt.) | Übersicht | Tabelle mit den Anfangsbuchstaben des ganzen Abschnitts (ab 5 Versen) | Card 3 |
 
 Bei einer Sammlung mit **einem einzigen Vers** zeigt Stufe 3 nur Titel und
 Stelle. Sie ist damit automatisch eine Karte „Stelle → Text". Dafür muss am
@@ -225,7 +226,24 @@ beim Export** aus den Daten erzeugt. In der App liegen nur strukturierte Daten.
   *Übergabe* („ab jetzt in Anki weiterlernen") oder ein Import in ein leeres
   Profil, kein fortlaufender Sync.
 
-### 6.3 Muss vorab getestet werden (technischer Test 1)
+### 6.3 Technischer Test 1: Ergebnis ✅ (Anki 26.09.4)
+
+Geprüft mit `tools/anki_verify.py`: Export von 25 Abschnitten mit 30 Tagen
+simuliertem Lernverlauf (392 Wiederholungen), Import in eine frische
+Sammlung mit FSRS.
+
+- Alle Notizen, Karten und Wiederholungen kommen an; Decks `BibleZ::<Titel>`.
+- FSRS-Zustand wird aus `cards.data` übernommen (`s`, `d`, `dr`, `decay`, `lrt`),
+  Stabilität und Schwierigkeit stimmen auf 0,01 genau.
+- Fälligkeiten: Review-Karten als Tag relativ zu `col.crt`; der Importer
+  rechnet sie korrekt auf die Ziel-Sammlung um. Lernkarten als Unix-Zeit.
+- Ruhende Stufen kommen als *ausgesetzt* an; keine Card-3-Karten.
+- Anki's Datenbank-Check ändert keine Karte.
+- Erneuter Import erzeugt keine Duplikate und keinen zweiten Notiztyp.
+- Gefundener und behobener Fehler: revlog-IDs müssen chronologisch vergeben
+  werden (sonst verschieben sich Zeitstempel).
+
+Ursprüngliche Fragen:
 
 - Liest das aktuelle Anki (Desktop, AnkiDroid, AnkiMobile) mit
   eingeschaltetem FSRS `cards.data` aus einem Legacy-apkg, oder rechnet es
@@ -243,7 +261,7 @@ beim Export** aus den Daten erzeugt. In der App liegen nur strukturierte Daten.
 ```
 translation   (id, name, language, license, versification, source_url)
 collection    (id, title, kind[verse|passage], translation_id?, source[bundled|custom],
-               settings{context_lines, overview_table, unlock_threshold},
+               learn_reference,
                anki_deck_id, owner_id, created_at, updated_at, deleted_at)
 segment       (id, collection_id, position, verse_number, part_letter, text,
                anki_note_id, anki_guid, updated_at, deleted_at)
@@ -302,7 +320,7 @@ monorepo (pnpm)
 
 ### MVP (v1.0)
 - [ ] Sammlung anlegen: Stelle aus freier Übersetzung **oder** eigener Text
-- [ ] Lernen mit Stufen 1–3 (+ Übersichtstabelle optional), schrittweise Freischaltung
+- [ ] Lernen mit Stufen 1–3, eine Stufe nach der anderen
 - [ ] Antwortmodi: Aufdecken, Anfangsbuchstaben tippen
 - [ ] FSRS mit Standardparametern, Zielquote und Tageslimit einstellbar
 - [ ] Startseite „Heute": fällige Wiederholungen, neue Verse, Fortschritt

@@ -1,0 +1,27 @@
+{
+  "name": "@biblez/core",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "export:sample": "tsx scripts/export-sample.ts"
+  },
+  "dependencies": {
+    "fflate": "^0.8.2",
+    "sql.js": "^1.13.0",
+    "ts-fsrs": "~5.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/sql.js": "^1.4.9",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.3",
+    "vitest": "~3.2.4"
+  }
+}

@@ -48,7 +48,7 @@ describe("Anki export", async () => {
     expect(f0.front).toBe("[Beginning]");
     expect(f0.table).toBe("");
     const f2 = noteFields(c.collection, segs, 2);
-    expect(f2.front).toBe("16 Also hat Gott die Welt geliebt,<br>daß er seinen eingebornen Sohn gab,<br>");
+    expect(f2.front).toBe("16 Also hat Gott die Welt geliebt,<br>daß er seinen eingeborenen Sohn gab,<br>");
     expect(f2.last_letters).toBe("au_ da_ all_, di_ a_ ih_ glaube_,");
     expect(f2.first_letters).toBe("a d a, d a i g,");
   });

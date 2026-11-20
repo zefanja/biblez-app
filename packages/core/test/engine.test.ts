@@ -47,7 +47,7 @@ describe("collections", () => {
     const card = snap.cards.find((c) => c.stage === 1 && c.segmentId === snap.segments[2]!.id)!;
     const face = cardFace(snap, card);
     expect(face.reference).toBe("Johannes 3,16c");
-    expect(face.context).toEqual(["Also hat Gott die Welt geliebt,", "daß er seinen eingebornen Sohn gab,"]);
+    expect(face.context).toEqual(["Also hat Gott die Welt geliebt,", "daß er seinen eingeborenen Sohn gab,"]);
     expect(face.prompt).toBe("au_ da_ all_, di_ a_ ih_ glaube_,");
   });
 });

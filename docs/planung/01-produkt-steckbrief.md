@@ -162,28 +162,32 @@ Planung** (wie bisher).
 
 ## 5. Bibeltexte
 
-### 5.1 Mitgelieferte, frei verfügbare Übersetzungen (Kandidaten; **Lizenz jeweils prüfen**)
+### 5.1 Mitgelieferte, frei verfügbare Übersetzungen ✅
 
-| Sprache | Übersetzung | Hinweis |
-|---------|-------------|---------|
-| DE | Luther 1912 | gemeinfrei |
-| DE | Schlachter 1951 | gemeinfrei (nicht die Schlachter 2000!) |
-| DE | Elberfelder 1905 | gemeinfrei (nicht die revidierte Fassung!) |
-| DE | Menge 1939 | Status prüfen |
-| EN | Berean Standard Bible (BSB) | seit 2023 gemeinfrei, modernes Englisch |
-| EN | World English Bible (WEB) | gemeinfrei |
-| EN | King James Version | in Großbritannien unter Crown Copyright, sonst gemeinfrei |
-| EN | ASV 1901 | gemeinfrei |
+| Sprache | Übersetzung | Status |
+|---------|-------------|--------|
+| DE | Luther 1912 | ✅ eingebunden |
+| DE | Schlachter 1951 | ✅ eingebunden (nicht die Schlachter 2000!) |
+| DE | Elberfelder 1905 (unrevidiert) | ✅ eingebunden |
+| DE | NeÜ (Neue evangelistische Übersetzung) | ❌ **nicht frei**: urheberrechtlich geschützt (K.-H. Vanheiden). Kostenlos lesbar, aber Einbau nur mit Erlaubnis. Pipeline ist vorbereitet. |
+| EN | King James Version | ✅ eingebunden (UK: Crown Copyright) |
+| EN | Berean Standard Bible | ✅ eingebunden – moderne, verbreitete Übersetzung, seit 2023 gemeinfrei |
+| EN | World English Bible | ✅ eingebunden |
 
-Mögliche Quellen: eBible.org, Zefania-XML- oder SWORD-Module (Lizenz je
-Modul prüfen). Übersetzungen werden **bei Bedarf heruntergeladen**
-(≈ 1–2 MB komprimiert), nicht in die App eingebaut.
+NIV, ESV, NLT, Luther 2017, Elberfelder (revidiert), Schlachter 2000, NGÜ, Hoffnung für alle:
+alle geschützt, nur mit Lizenz.
+
+Technik: `pnpm bibles` lädt die Quellen (fester Commit, SHA-256), wandelt
+sie um und erzeugt pro Übersetzung eine Datei je Buch (~70 KB gz). Die App
+lädt nur das benötigte Buch. Offen: Für die nativen Apps sind alle sechs
+Übersetzungen zusammen ~25 MB unkomprimiert – dort besser komprimiert
+ausliefern oder bei Bedarf herunterladen.
 
 ### 5.2 Sammlung anlegen
 
-1. **Stelle eingeben:** „Joh 3,16", „Ps 23", „Röm 8,28-39". Dafür braucht es
-   einen Parser für Stellenangaben mit deutschen und englischen Buchnamen und
-   Abkürzungen.
+1. **Stelle eingeben:** „Joh 3,16", „Ps 23", „Röm 8,28-39", „Mt 5-7",
+   „John 3:16". ✅ Parser für deutsche und englische Buchnamen/Abkürzungen
+   (Loccumer Richtlinien bzw. SBL), höchstens 60 Verse pro Sammlung.
 2. **Eigenen Text einfügen:** Der vorhandene Auto-Formatter
    (`app/js/formatter.js`) erkennt die Versnummern.
 3. **Lange Verse** schlägt die App zur Teilung an Satzzeichen vor; der Nutzer
@@ -362,8 +366,10 @@ mit echten Lerndaten überprüfen.
 - Reihenfolge: **Wiederholungen gemischt** (für den Tag stabil), neue
   Abschnitte in Textreihenfolge.
 
+- [x] Freie Übersetzungen (6) + Stellenangaben-Parser + Vorschläge (15 bekannte Stellen)
+
 **Als Nächstes:**
-1. Freie Übersetzungen importieren (Lizenzen prüfen) + Stellenangaben-Parser
+1. NeÜ: Erlaubnis anfragen (optional)
 2. Capacitor: iOS/Android-Projekte, SQLite-Plugin, lokale Erinnerung, Teilen-Menü für den Export
 3. PWA: Offline-Cache (Service Worker), installierbar
 4. Test mit 5 Personen aus der Zielgruppe

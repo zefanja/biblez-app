@@ -89,6 +89,27 @@ try {
   if (created !== custom) throw new Error(`collection has ${created} chunks, editor had ${custom}`);
   step("custom collection created with the edited chunks");
 
+  // Bible reference from a bundled free translation
+  await page.goto(`http://localhost:${port}/#/add`);
+  await page.getByLabel("Übersetzung").selectOption("sch1951");
+  await page.getByLabel("Stelle").fill("Joh 30,1");
+  await page.getByText("Dieses Kapitel gibt es in dem Buch nicht.").waitFor();
+  await page.getByLabel("Stelle").fill("Röm 8,28-30");
+  await page.getByText("Römer 8,28–30", { exact: true }).waitFor();
+  await page.getByText(/3 Verse, \d+ Abschnitte erkannt/).waitFor();
+  const firstChunk = await page.locator(".chunk-main .verse").first().textContent();
+  if (!firstChunk?.startsWith("Wir wissen aber")) throw new Error(`unexpected Schlachter text: ${firstChunk}`);
+  await shot("08a-add-reference");
+  step("reference: errors shown, Röm 8,28-30 loaded from Schlachter 1951");
+  await page.getByLabel("Übersetzung").selectOption("kjv");
+  await page.getByLabel("Stelle").fill("");
+  await page.getByRole("button", { name: "Psalm 23" }).click();
+  await page.getByText(/6 Verse, \d+ Abschnitte erkannt/).waitFor();
+  if (!(await page.getByText("The LORD is my shepherd;", { exact: true }).count())) throw new Error("KJV Psalm 23 missing");
+  await page.getByRole("button", { name: "Sammlung anlegen" }).click();
+  await page.getByText("Lies den Vers in Ruhe").waitFor();
+  step("suggestion chip → KJV Psalm 23 created");
+
   await page.goto(`http://localhost:${port}/#/verses`);
   await page.getByRole("heading", { name: "Meine Verse" }).waitFor();
   await shot("08-verses"); step("verses list");

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useApp, type Lang } from "./store";
 
 const de = {
@@ -70,6 +71,18 @@ const de = {
   emptyVerses: "Noch keine Verse. Füg deinen ersten hinzu!",
   cancel: "Abbrechen",
   suggestions: "Vorschläge",
+  bibleReference: "Bibelstelle",
+  reference: "Stelle",
+  referencePlaceholder: "z. B. Joh 3,16 oder Ps 23",
+  translation: "Übersetzung",
+  refBook: "Dieses Buch kenne ich nicht.",
+  refFormat: "Schreib die Stelle z. B. so: Joh 3,16 · Röm 8,28-39 · Ps 23",
+  refChapter: "Dieses Kapitel gibt es in dem Buch nicht.",
+  refVerse: "Diesen Vers gibt es in dem Kapitel nicht.",
+  refTooLong: "Das ist zu lang. Bitte höchstens 60 Verse auf einmal.",
+  loadFailed: "Der Bibeltext konnte nicht geladen werden. Bist du online?",
+  publicDomain: "gemeinfrei",
+  sTexts: "Bibeltexte",
   ownText: "Eigener Text",
   title: "Titel",
   titlePlaceholder: "z. B. Römer 8,28–39",
@@ -201,6 +214,18 @@ const en: Record<Key, string> = {
   emptyVerses: "No verses yet. Add your first one!",
   cancel: "Cancel",
   suggestions: "Suggestions",
+  bibleReference: "Bible reference",
+  reference: "Reference",
+  referencePlaceholder: "e.g. John 3:16 or Psalm 23",
+  translation: "Translation",
+  refBook: "I don’t know this book.",
+  refFormat: "Write the reference like this: John 3:16 · Rom 8:28-39 · Ps 23",
+  refChapter: "This chapter doesn’t exist in this book.",
+  refVerse: "This verse doesn’t exist in this chapter.",
+  refTooLong: "That’s too long. Please take at most 60 verses at once.",
+  loadFailed: "The Bible text could not be loaded. Are you online?",
+  publicDomain: "public domain",
+  sTexts: "Bible texts",
   ownText: "Own text",
   title: "Title",
   titlePlaceholder: "e.g. Romans 8:28–39",
@@ -270,5 +295,6 @@ export function translate(lang: Lang): T {
 }
 
 export function useT(): T {
-  return translate(useApp().ui.lang);
+  const lang = useApp().ui.lang;
+  return useMemo(() => translate(lang), [lang]);
 }

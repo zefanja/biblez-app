@@ -1,4 +1,6 @@
-import { useRef, type ReactNode } from "react";
+import type { TranslationInfo } from "@biblez/core";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { loadTranslations } from "../bible";
 import { useT } from "../i18n";
 import { actions, useApp, type FontSize, type Lang, type Theme } from "../store";
 import { download, Icon, Switch, Toast, useToast } from "../ui";
@@ -30,6 +32,8 @@ export function SettingsScreen() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [toast, showToast, hideToast] = useToast();
   const stamp = new Date().toISOString().slice(0, 10);
+  const [translations, setTranslations] = useState<TranslationInfo[]>([]);
+  useEffect(() => { loadTranslations().then(setTranslations).catch(() => {}); }, []);
 
   const exportAnki = () => {
     const { blob } = actions.exportAnki();
@@ -105,6 +109,23 @@ export function SettingsScreen() {
         </button>
       </div>
       <input ref={fileInput} type="file" accept="application/json,.json" className="visually-hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) void restore(f); e.target.value = ""; }} />
+
+      {translations.length > 0 && (
+        <>
+          <span className="label">{t("sTexts")}</span>
+          <div className="list">
+            {translations.map((x) => (
+              <div key={x.id} className="list-row" style={{ alignItems: "flex-start", padding: "10px 16px" }}>
+                <span className="stack" style={{ gap: 2 }}>
+                  <span>{x.name}</span>
+                  {x.licenseNote && <span className="tiny muted" style={{ fontWeight: 400 }}>{x.licenseNote}</span>}
+                </span>
+                <span className="value tiny">{x.license === "Public Domain" ? t("publicDomain") : x.license}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="row small muted" style={{ justifyContent: "center", gap: 8 }}>
         <Icon name="lock" size={16} />

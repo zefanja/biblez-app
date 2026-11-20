@@ -16,6 +16,13 @@ docs/planung    Produkt-Steckbrief
 pnpm install
 ```
 
+Bibeltexte erzeugen (lädt beim ersten Mal ~55 MB Quellen nach `.cache/bibles`,
+prüft die SHA-256-Summen und schreibt `apps/client/public/bibles/`):
+
+```bash
+pnpm bibles
+```
+
 ```bash
 pnpm dev
 ```
@@ -58,6 +65,22 @@ cd apps/client && pnpm build && npx cap add ios && npx cap add android
 ```bash
 npx cap sync && npx cap open ios
 ```
+
+## Bibeltexte
+
+| ID | Übersetzung | Quelle | Lizenz |
+|----|-------------|--------|--------|
+| `lut1912` | Luther 1912 | seven1m/open-bibles (OSIS) | gemeinfrei |
+| `sch1951` | Schlachter 1951 | scrollmapper/bible_databases (JSON) | gemeinfrei |
+| `elb1905` | Elberfelder 1905 (unrevidiert) | scrollmapper/bible_databases (JSON) | gemeinfrei |
+| `kjv` | King James Version | seven1m/open-bibles (OSIS) | gemeinfrei, außer UK (Crown Copyright) |
+| `bsb` | Berean Standard Bible | seven1m/open-bibles (USFX) | gemeinfrei (CC0, seit 2023) |
+| `web` | World English Bible | seven1m/open-bibles (USFX) | gemeinfrei |
+
+Quellen sind auf einen Commit festgelegt und per SHA-256 geprüft
+(`packages/core/scripts/build-bibles.ts`). Eine weitere Übersetzung = ein
+Eintrag in `SOURCES`, sofern ihr Format (OSIS, USFX, scrollmapper-JSON)
+schon unterstützt wird. Die erzeugten Dateien werden nicht eingecheckt.
 
 ## Wichtige Regeln im Code
 

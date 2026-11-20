@@ -20,6 +20,8 @@ export interface UiPrefs {
   theme: Theme;
   fontSize: FontSize;
   lang: Lang;
+  /** Last translation chosen when adding a passage. */
+  translation?: string;
 }
 
 export interface AppState {

@@ -11,3 +11,6 @@ export { dayStart, nextDayStart, daysBetween } from "./scheduler/day";
 export { replay, State } from "./scheduler/fsrs";
 export { exportApkg, buildAnkiCollection, noteFields, ROOT_DECK_NAME, type ExportOptions, type ExportResult } from "./anki/apkg";
 export { NOTETYPE_ID, NOTETYPE_NAME } from "./anki/notetype";
+export { BOOKS, findBook, BOOK_BY_USFM, type BookInfo } from "./bible/books";
+export { parseReference, formatReference, isReference, type Reference, type ReferenceError } from "./bible/reference";
+export { validateReference, extractPassage, MAX_PASSAGE_VERSES, type BibleIndex, type BibleBook, type TranslationInfo, type PassageError } from "./bible/data";

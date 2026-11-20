@@ -17,7 +17,7 @@ describe("chunkVerse", () => {
   it("splits John 3:16 (Luther 1912) into five short chunks", () => {
     expect(chunkVerse(SAMPLES[0]!.verses[0]!.text)).toEqual([
       "Also hat Gott die Welt geliebt,",
-      "daß er seinen eingebornen Sohn gab,",
+      "daß er seinen eingeborenen Sohn gab,",
       "auf daß alle, die an ihn glauben,",
       "nicht verloren werden,",
       "sondern das ewige Leben haben.",
@@ -66,13 +66,13 @@ describe("parseVerses", () => {
 });
 
 describe("manual chunk edits", () => {
-  const chunks = ["Also hat Gott die Welt geliebt,", "daß er seinen eingebornen Sohn gab,"];
+  const chunks = ["Also hat Gott die Welt geliebt,", "daß er seinen eingeborenen Sohn gab,"];
   it("merges two chunks", () => {
-    expect(mergeChunks(chunks, 0)).toEqual(["Also hat Gott die Welt geliebt, daß er seinen eingebornen Sohn gab,"]);
+    expect(mergeChunks(chunks, 0)).toEqual(["Also hat Gott die Welt geliebt, daß er seinen eingeborenen Sohn gab,"]);
     expect(mergeChunks(chunks, 1)).toBe(chunks);
   });
   it("splits before a word", () => {
-    expect(splitChunk(chunks, 0, 3)).toEqual(["Also hat Gott", "die Welt geliebt,", "daß er seinen eingebornen Sohn gab,"]);
+    expect(splitChunk(chunks, 0, 3)).toEqual(["Also hat Gott", "die Welt geliebt,", "daß er seinen eingeborenen Sohn gab,"]);
     expect(splitChunk(chunks, 0, 0)).toBe(chunks);
     expect(splitChunk(chunks, 0, 6)).toBe(chunks);
   });

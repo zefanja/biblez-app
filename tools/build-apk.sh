@@ -11,5 +11,5 @@ npx cap sync android
 cd android
 [ -f local.properties ] || echo "sdk.dir=$SDK" > local.properties
 # one worker: the session's network proxy rejects many parallel downloads (HTTP 429)
-ANDROID_HOME="$SDK" ./gradlew assembleDebug --max-workers=1 -q
+ANDROID_HOME="$SDK" ./gradlew assembleDebug --max-workers=1 -q -Dorg.gradle.internal.repository.max.retries=8 -Dorg.gradle.internal.repository.initial.backoff=3000
 echo "APK: apps/client/android/app/build/outputs/apk/debug/app-debug.apk"

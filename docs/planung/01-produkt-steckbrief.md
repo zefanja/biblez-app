@@ -370,7 +370,7 @@ mit echten Lerndaten überprüfen.
 
 **Als Nächstes:**
 1. NeÜ: Erlaubnis anfragen (optional)
-2. Capacitor: iOS/Android-Projekte, SQLite-Plugin, lokale Erinnerung, Teilen-Menü für den Export
+2. Capacitor: ~~Android-Projekt~~ ✅, ~~App-Icon~~ ✅, ~~Teilen-Menü~~ ✅, ~~Release-Signatur~~ ✅; offen: SQLite-Plugin, lokale Erinnerung, iOS
 3. PWA: Offline-Cache (Service Worker), installierbar
 4. Test mit 5 Personen aus der Zielgruppe
 

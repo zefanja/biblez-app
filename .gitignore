@@ -8,3 +8,7 @@ playwright-report/
 *.tsbuildinfo
 __pycache__/
 .venv/
+dist-android/
+keystore.properties
+*.jks
+*.keystore

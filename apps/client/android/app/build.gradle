@@ -1,5 +1,33 @@
 apply plugin: 'com.android.application'
 
+import groovy.json.JsonSlurper
+
+// Version from the monorepo's package.json: 1.2.3 → versionName "1.2.3", versionCode 10203.
+// CI can override the code with BIBLEZ_VERSION_CODE (must only ever grow on Google Play).
+def rootPackage = new JsonSlurper().parse(file('../../../../package.json'))
+def appVersion = rootPackage.version as String
+def versionParts = appVersion.tokenize('.').collect { it.replaceAll(/\D.*/, '') as int }
+def appVersionCode = (System.getenv('BIBLEZ_VERSION_CODE') ?: (versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]).toString()) as int
+
+// Release signing. Never commit the keystore or its passwords. Sources, in this order:
+//  1. environment: BIBLEZ_KEYSTORE_FILE, BIBLEZ_KEYSTORE_PASSWORD, BIBLEZ_KEY_ALIAS, BIBLEZ_KEY_PASSWORD
+//  2. android/keystore.properties (git-ignored): storeFile, storePassword, keyAlias, keyPassword
+// Without either, release builds stay unsigned.
+def signing = [:]
+if (System.getenv('BIBLEZ_KEYSTORE_FILE')) {
+    signing = [storeFile: System.getenv('BIBLEZ_KEYSTORE_FILE'), storePassword: System.getenv('BIBLEZ_KEYSTORE_PASSWORD'),
+               keyAlias: System.getenv('BIBLEZ_KEY_ALIAS'), keyPassword: System.getenv('BIBLEZ_KEY_PASSWORD')]
+} else {
+    def propsFile = rootProject.file('keystore.properties')
+    if (propsFile.exists()) {
+        def props = new Properties()
+        propsFile.withInputStream { props.load(it) }
+        signing = props
+    }
+}
+def hasSigning = signing.storeFile && signing.storePassword && signing.keyAlias && signing.keyPassword
+if (!hasSigning) logger.warn('BibleZ: no release keystore configured – release builds will be unsigned (see docs/ENTWICKLUNG.md).')
+
 android {
     namespace "de.biblez.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -7,8 +35,8 @@ android {
         applicationId "de.biblez.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode appVersionCode
+        versionName appVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +44,19 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasSigning) {
+            release {
+                storeFile file(signing.storeFile)
+                storePassword signing.storePassword
+                keyAlias signing.keyAlias
+                keyPassword signing.keyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasSigning) signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

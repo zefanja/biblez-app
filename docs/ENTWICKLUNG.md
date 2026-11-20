@@ -78,8 +78,43 @@ pnpm android:apk
 Ergebnis: `apps/client/android/app/build/outputs/apk/debug/app-debug.apk`
 (≈14 MB, mit Debug-Schlüssel signiert, alle sechs Bibelübersetzungen enthalten).
 
-Noch offen: Release-Signatur (Keystore), natives SQLite statt
-IndexedDB, lokale Erinnerungen, Teilen-Menü für den Anki-Export.
+### Release (signiert)
+
+Einmalig auf **deinem eigenen Rechner** den Upload-Schlüssel erzeugen. Das
+Skript fragt ein Passwort ab, legt `~/.biblez/biblez-upload.jks` an und
+schreibt `apps/client/android/keystore.properties` (git-ignoriert):
+
+```bash
+pnpm android:keystore
+```
+
+Danach App Bundle (Google Play) und APK (direkte Installation) bauen:
+
+```bash
+pnpm android:release
+```
+
+Ergebnis in `dist-android/`: `BibleZ-<version>.aab` und `.apk`; das Skript
+zeigt Zertifikat und SHA-256 der Signatur. Ohne Schlüssel entsteht ein
+unsignierter Build mit Warnung.
+
+- **Google Play App Signing** verwenden: Google verwaltet den eigentlichen
+  App-Signaturschlüssel, unser Schlüssel ist nur der *Upload-Schlüssel* und
+  kann bei Verlust über die Play Console zurückgesetzt werden.
+- `.jks` und Passwort sicher aufbewahren (Passwortmanager) – **nie** ins Repo.
+- Für eine Build-Pipeline statt der Datei Umgebungsvariablen setzen:
+  `BIBLEZ_KEYSTORE_FILE`, `BIBLEZ_KEYSTORE_PASSWORD`, `BIBLEZ_KEY_ALIAS`,
+  `BIBLEZ_KEY_PASSWORD`; optional `BIBLEZ_VERSION_CODE`.
+- Version: `version` in der Root-`package.json` (1.2.3 → versionCode 10203).
+
+### Teilen
+
+Anki-Export und Backup öffnen in der App das System-Teilen-Menü
+(`@capacitor/share`, Datei im App-Cache über `@capacitor/filesystem`) – von
+dort direkt an AnkiDroid, Drive, Mail … Im mobilen Browser wird die Web
+Share API genutzt, am Desktop heruntergeladen (`apps/client/src/share.ts`).
+
+Noch offen: natives SQLite statt IndexedDB, lokale Erinnerungen.
 
 ## App-Icon
 

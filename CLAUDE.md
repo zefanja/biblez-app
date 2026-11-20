@@ -13,6 +13,8 @@ pnpm monorepo: `packages/core` (domain logic, no UI) and `apps/client`
 - `pnpm e2e` – builds the client and runs the browser E2E (Chromium via Playwright)
 - `pnpm check` – typecheck + unit tests + E2E in one go
 - `pnpm android:apk` – Android debug APK (JDK 21 + SDK in /opt/android-sdk)
+- `pnpm android:release` – signed .aab + .apk into dist-android/ (needs keystore, see docs)
+- `pnpm icons` – regenerate all icons from design/icon/*.svg
 - `pnpm verify:anki` – checks the .apkg export with the real Anki package (`.venv` with `anki`)
 
 Run `pnpm check` before every commit; add `pnpm verify:anki` for changes to
@@ -27,3 +29,4 @@ scheduling, storage or export.
 - One stage at a time; no sibling stages on the same day.
 - UI copy in German and English (`apps/client/src/i18n.ts`); keep both in sync.
 - Bible texts: only public-domain or licensed translations (see brief §5.1).
+- Never commit keystores (`*.jks`, `keystore.properties`) or their passwords.

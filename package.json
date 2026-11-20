@@ -15,7 +15,9 @@
     "e2e": "pnpm --filter @biblez/client build && pnpm --filter @biblez/client e2e",
     "check": "pnpm -r typecheck && pnpm --filter @biblez/core test && pnpm e2e",
     "android:apk": "sh tools/build-apk.sh",
-    "icons": "node tools/generate-icons.mjs"
+    "icons": "node tools/generate-icons.mjs",
+    "android:release": "sh tools/build-release.sh",
+    "android:keystore": "sh tools/create-keystore.sh"
   },
   "repository": {
     "type": "git",

@@ -3,7 +3,8 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadTranslations } from "../bible";
 import { useT } from "../i18n";
 import { actions, useApp, type FontSize, type Lang, type Theme } from "../store";
-import { download, Icon, Switch, Toast, useToast } from "../ui";
+import { shareFile } from "../share";
+import { Icon, Switch, Toast, useToast } from "../ui";
 
 const APP_VERSION = "0.1.0";
 
@@ -35,10 +36,19 @@ export function SettingsScreen() {
   const [translations, setTranslations] = useState<TranslationInfo[]>([]);
   useEffect(() => { loadTranslations().then(setTranslations).catch(() => {}); }, []);
 
-  const exportAnki = () => {
-    const { blob } = actions.exportAnki();
-    download(blob, `BibleZ-${stamp}.apkg`);
+  const [busy, setBusy] = useState(false);
+  const share = async (make: () => Blob, filename: string, title: string) => {
+    setBusy(true);
+    try {
+      const result = await shareFile(make(), filename, title);
+      if (result === "downloaded") showToast(t("fileSaved", { name: filename }));
+    } catch {
+      showToast(t("shareFailed"));
+    } finally {
+      setBusy(false);
+    }
   };
+  const exportAnki = () => share(() => actions.exportAnki().blob, `BibleZ-${stamp}.apkg`, t("ankiTitle"));
   const restore = async (file: File) => {
     if (!window.confirm(t("restoreConfirm"))) return;
     try {
@@ -96,10 +106,10 @@ export function SettingsScreen() {
         </div>
         <span className="small" style={{ lineHeight: 1.5 }}>{t("ankiText")}</span>
         <div className="warn"><Icon name="info" size={18} /><span>{t("ankiWarning")}</span></div>
-        <button className="btn primary" onClick={exportAnki} disabled={snapshot.segments.length === 0}>{t("ankiButton")}</button>
+        <button className="btn primary" onClick={exportAnki} disabled={busy || snapshot.segments.length === 0}>{t("ankiButton")}</button>
       </div>
       <div className="list">
-        <button className="list-row" onClick={() => download(actions.backup(), `BibleZ-Backup-${stamp}.json`)}>
+        <button className="list-row" disabled={busy} onClick={() => share(() => actions.backup(), `BibleZ-Backup-${stamp}.json`, t("backupSave"))}>
           {t("backupSave")}
           <Icon name="chevron" size={18} />
         </button>

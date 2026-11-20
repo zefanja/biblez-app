@@ -127,7 +127,7 @@ try {
   const stats = await page.getByText(/Abschnitte · \d+ Wiederholungen/).textContent();
   if (!/· 11 Wiederholungen/.test(stats ?? "")) throw new Error(`reviews not persisted: ${stats}`);
   step(`learning history survived reload (${stats})`);
-  const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: ".apkg-Datei erstellen" }).click()]);
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Exportieren und teilen" }).click()]);
   const path = await dl.path();
   const size = statSync(path).size;
   if (size < 2000) throw new Error(`apkg too small: ${size}`);

@@ -1,6 +1,6 @@
 # Bible Memorizer App – Produkt-Steckbrief
 
-Status: **Entwurf v0.2** · Stand: 2026-11-20
+Status: **Entwurf v0.3** · Stand: 2026-11-20
 
 Dieses Dokument hält die bisherigen Entscheidungen fest, leitet daraus das
 Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen.
@@ -23,6 +23,12 @@ Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen
 | E10 | Bibelstelle mitlernen | **Ja**: bei Einzelversen immer, bei Abschnitten optional |
 | E11 | Lizenz | Code gehört komplett dem Autor; Empfehlung **MIT**, siehe Abschnitt 12 |
 | E12 | Kinder unter 16 | **Ja** → Datenschutz nach Abschnitt 13 |
+| E13 | Stil | **Ruhig und freundlich** (siehe Abschnitt 14) |
+| E14 | Startseite | **„Heute"**; Tabs: Heute · Verse · Einstellungen |
+| E15 | Erster Start | Sofort lernen mit **Johannes 3,16**, ohne Einstellungen |
+| E16 | Motivation | **Kein Streak**; Kennzahl „Sicher im Gedächtnis" |
+| E17 | Name | **BibleZ** |
+| E18 | Geld | Vorerst **kostenlos**; Spenden ggf. später |
 
 ---
 
@@ -289,13 +295,11 @@ Gruppen und Klassen · weitere Sprachen · Homescreen-Widgets
 
 ## 10. Offene Fragen
 
-**Runde 3 (Design):**
-1. Stil: ruhig und andächtig oder spielerisch und bunt?
-2. Startseite: „Heute" (fällige Verse) oder „Meine Sammlungen"?
-3. Einstieg: Vorschlagsliste bekannter Verse beim ersten Start?
-4. App-Name und Logo; Lizenz bestätigen (MIT?)
-5. Geschäftsmodell: kostenlos, Spenden?
-6. Motivation: Streak ja/nein; welche Kennzahl steht im Vordergrund?
+**Runde 4 (Feedback zum Prototyp):**
+1. Stimmen Farben, Schriften und Ton?
+2. Bleibt die Bibelstelle im ersten Lernfluss bei 4 Karten (16a/16b Stufe 1, 16a Stufe 2, ganzer Vers Stufe 3)?
+3. Lizenz MIT bestätigen
+4. Dunkelmodus und Schriftgröße: wie wichtig für v1?
 
 ---
 
@@ -345,3 +349,22 @@ Gruppen und Klassen · weitere Sprachen · Homescreen-Widgets
 - **Sync später:** Konten für Kinder brauchen die Zustimmung der Eltern
   (Deutschland: unter 16; USA: unter 13). Alternative ohne personenbezogene
   Daten: anonymer Sync-Code oder QR-Code statt E-Mail-Konto.
+
+## 14. Gestaltung (Prototyp v0.1)
+
+Prototyp: Design-Canvas „BibleZ Prototyp" (6 Screens, der erste Start ist klickbar).
+
+| Token | Wert | Verwendung |
+|-------|------|------------|
+| Grund | `#F6F5F1` | Hintergrund |
+| Fläche | `#FFFFFF`, Rand `#E4E2DB` | Karten |
+| Akzent | `#2C6A63` (tiefes Petrol) | Hauptknöpfe, Fortschritt, Antworttext |
+| Akzent hell | `#E3EFEC` | Hinweise, Zweitknöpfe |
+| Text | `#1E2321`, gedämpft `#5E6662` | |
+| Warnung | `#FBEBDD` / `#8A4B12` | „fällig", Export-Hinweis |
+| Oberflächenschrift | Figtree | freundlich, gut lesbar |
+| Bibeltext | Literata (Serif) | für langes Lesen gemacht, ruhig |
+
+Grundsätze: große Touch-Flächen (≥ 44 px, Hauptknöpfe 56 px), eine
+Hauptaktion pro Screen, keine Emojis, kein Druck (kein Streak, keine roten
+Zähler), Bibeltext immer in Serifenschrift.

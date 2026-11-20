@@ -1,4 +1,4 @@
-import type { TranslationInfo } from "@biblez/core";
+import { AnkiImportError, type TranslationInfo } from "@biblez/core";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { loadTranslations } from "../bible";
 import { useT } from "../i18n";
@@ -32,6 +32,7 @@ export function SettingsScreen() {
   const t = useT();
   const { settings, ui, snapshot, dbKind } = useApp();
   const fileInput = useRef<HTMLInputElement>(null);
+  const ankiInput = useRef<HTMLInputElement>(null);
   const [toast, showToast, hideToast] = useToast();
   const stamp = new Date().toISOString().slice(0, 10);
   const [translations, setTranslations] = useState<TranslationInfo[]>([]);
@@ -55,6 +56,24 @@ export function SettingsScreen() {
     }
   };
   const exportAnki = () => share(async () => (await actions.exportAnki()).blob, `BibleZ-${stamp}.apkg`, t("ankiTitle"));
+  const importAnki = async (file: File) => {
+    setBusy(true);
+    try {
+      const result = await actions.prepareAnkiImport(new Uint8Array(await file.arrayBuffer()));
+      const r = result.report;
+      const list = r.collections.map((c) => `• ${c.title} (${c.segments})`).join("\n");
+      const notes = [r.skippedDuplicates ? t("ankiImportSkipped", { n: r.skippedDuplicates }) : "", r.ignoredTableCards ? t("ankiImportTable", { n: r.ignoredTableCards }) : ""].filter(Boolean).join("\n");
+      const message = t("ankiImportConfirm", { c: r.collections.length, s: r.segments, r: r.reviews, list }) + (notes ? `\n\n${notes}` : "");
+      if (!window.confirm(message)) return;
+      await actions.commitAnkiImport(result);
+      showToast(t("ankiImportDone", { s: r.segments, r: r.reviews }));
+    } catch (e) {
+      const code = e instanceof AnkiImportError ? e.code : null;
+      showToast(code === "not_anki" ? t("ankiImportNotAnki") : code === "no_bible_memorizer_notes" ? t("ankiImportNone") : code === "nothing_new" ? t("ankiImportNothingNew") : t("ankiImportFailed"));
+    } finally {
+      setBusy(false);
+    }
+  };
   const restore = async (file: File) => {
     if (!window.confirm(t("restoreConfirm"))) return;
     try {
@@ -136,6 +155,14 @@ export function SettingsScreen() {
         <div className="warn"><Icon name="info" size={18} /><span>{t("ankiWarning")}</span></div>
         <button className="btn primary" onClick={exportAnki} disabled={busy || snapshot.segments.length === 0}>{t("ankiButton")}</button>
       </div>
+      <div className="card stack" style={{ gap: 10 }}>
+        <span style={{ fontWeight: 700 }}>{t("ankiImportTitle")}</span>
+        <span className="small" style={{ lineHeight: 1.5 }}>{t("ankiImportText")}</span>
+        <span className="tiny muted" style={{ lineHeight: 1.5 }}>{t("ankiImportHowTo")}</span>
+        <button className="btn secondary" disabled={busy} onClick={() => ankiInput.current?.click()}>{t("ankiImportButton")}</button>
+      </div>
+      <input ref={ankiInput} type="file" accept=".apkg,.colpkg,application/octet-stream,application/zip" className="visually-hidden" aria-label={t("ankiImportButton")}
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) void importAnki(f); e.target.value = ""; }} />
       <div className="list">
         <button className="list-row" disabled={busy} onClick={() => share(() => actions.backup(), `BibleZ-Backup-${stamp}.json`, t("backupSave"))}>
           {t("backupSave")}

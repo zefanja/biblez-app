@@ -106,6 +106,9 @@ function defaultDeckConfig() {
 
 // ------------------------------------------------------------------ export
 
+/** Imported collections keep the note type id of the user's Anki collection. */
+const notetypeOf = (c: Collection) => c.ankiNotetypeId ?? NOTETYPE_ID;
+
 const revlogType = (s: State) => (s === State.Review ? 1 : s === State.Relearning ? 2 : 0);
 const revlogIvl = (step: ReplayStep) =>
   step.after.state === State.Review
@@ -126,10 +129,11 @@ export function buildAnkiCollection(SQL: SqlJsStatic, snapshot: Snapshot, option
   const decks: Record<string, unknown> = { 1: deckJson(1, "Default", 0), [ROOT_DECK_ID]: deckJson(ROOT_DECK_ID, ROOT_DECK_NAME, nowSec) };
   for (const c of collections) decks[c.ankiDeckId] = deckJson(c.ankiDeckId, `${ROOT_DECK_NAME}::${c.title}`, nowSec);
   const firstDeck = collections[0]?.ankiDeckId ?? ROOT_DECK_ID;
-  const conf = { activeDecks: [firstDeck], curDeck: firstDeck, curModel: NOTETYPE_ID, nextPos: 1, sortType: "noteFld", sortBackwards: false, addToCur: true, dayLearnFirst: false, schedVer: 2, rollover: settings.dayStartHour, collapseTime: 1200, estTimes: true, dueCounts: true, newSpread: 0, timeLim: 0 };
+  const conf = { activeDecks: [firstDeck], curDeck: firstDeck, curModel: collections[0] ? notetypeOf(collections[0]) : NOTETYPE_ID, nextPos: 1, sortType: "noteFld", sortBackwards: false, addToCur: true, dayLearnFirst: false, schedVer: 2, rollover: settings.dayStartHour, collapseTime: 1200, estTimes: true, dueCounts: true, newSpread: 0, timeLim: 0 };
   db.run("INSERT INTO col VALUES (1, ?, ?, ?, 11, 0, 0, 0, ?, ?, ?, ?, '{}')", [
     Math.floor(crtMs / 1000), now, now, JSON.stringify(conf),
-    JSON.stringify({ [NOTETYPE_ID]: notetypeJson(firstDeck, nowSec) }), JSON.stringify(decks), JSON.stringify(defaultDeckConfig()),
+    JSON.stringify(Object.fromEntries([...new Set(collections.map(notetypeOf))].map((id) => [id, notetypeJson(firstDeck, nowSec, id)]))),
+    JSON.stringify(decks), JSON.stringify(defaultDeckConfig()),
   ]);
 
   const insNote = db.prepare("INSERT INTO notes VALUES (?, ?, ?, ?, -1, ' BibleZ ', ?, ?, ?, 0, '')");
@@ -153,7 +157,7 @@ export function buildAnkiCollection(SQL: SqlJsStatic, snapshot: Snapshot, option
       const fields = noteFields(collection, segments, index);
       const flds = FIELD_NAMES.map((f) => fields[f]).join("\x1f");
       const csum = parseInt(sha1Hex(fields.answer.replace(/<[^>]*>/g, "")).slice(0, 8), 16);
-      insNote.run([seg.ankiNoteId, seg.ankiGuid, NOTETYPE_ID, nowSec, flds, fields[FIELD_NAMES[SORT_FIELD_INDEX]!], csum]);
+      insNote.run([seg.ankiNoteId, seg.ankiGuid, notetypeOf(collection), nowSec, flds, fields[FIELD_NAMES[SORT_FIELD_INDEX]!], csum]);
       noteCount++;
 
       for (const card of (cardsBySegment.get(seg.id) ?? []).sort((a, b) => a.stage - b.stage)) {

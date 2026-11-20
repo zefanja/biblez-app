@@ -1,0 +1,658 @@
+{
+ "anki": "26.09.4",
+ "answered": 60,
+ "notes": [
+  {
+   "id": 1795210852247,
+   "guid": "w>h|8&JS|q",
+   "fields": {
+    "answer": "16 Also hat Gott die Welt geliebt, daß er seinen eingebornen Sohn gab,",
+    "verse_number": "16",
+    "verse_part": "a",
+    "table": "",
+    "front": "[Beginning]",
+    "back": "16 Also hat Gott die Welt geliebt, daß er seinen eingebornen Sohn gab,<br>auf daß alle, die an ihn glauben, nicht verloren werden, sondern das ewige Leben haben.<br>",
+    "first_letters": "A h G d W g, d e s e S g,",
+    "last_letters": "Als_ ha_ Got_ di_ Wel_ gelieb_, da_ e_ seine_ eingeborne_ Soh_ ga_,",
+    "title": "Johannes 3,16",
+    "id": "1795210852244-0"
+   },
+   "cards": [
+    {
+     "id": 1795210852248,
+     "ord": 0,
+     "queue": -1,
+     "revlog": [
+      {
+       "id": 1795210852254,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852274,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852278,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852249,
+     "ord": 1,
+     "queue": 0,
+     "revlog": [
+      {
+       "id": 1795210852260,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852310,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852314,
+       "ease": 0,
+       "type": 4
+      }
+     ]
+    },
+    {
+     "id": 1795210852250,
+     "ord": 3,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852269,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852275,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852307,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1795210852249,
+   "guid": "k-W-z3fD1{",
+   "fields": {
+    "answer": "auf daß alle, die an ihn glauben, nicht verloren werden, sondern das ewige Leben haben.",
+    "verse_number": "16",
+    "verse_part": "b",
+    "table": "",
+    "front": "16 Also hat Gott die Welt geliebt, daß er seinen eingebornen Sohn gab,<br>",
+    "back": "auf daß alle, die an ihn glauben, nicht verloren werden, sondern das ewige Leben haben.<br>",
+    "first_letters": "a d a, d a i g, n v w, s d e L h.",
+    "last_letters": "au_ da_ all_, di_ a_ ih_ glaube_, nich_ verlore_ werde_, sonder_ da_ ewig_ Lebe_ habe_.",
+    "title": "Johannes 3,16",
+    "id": "1795210852244-1"
+   },
+   "cards": [
+    {
+     "id": 1795210852251,
+     "ord": 0,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852255,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852308,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852252,
+     "ord": 1,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852261,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852282,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852290,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852253,
+     "ord": 3,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852270,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852291,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852293,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1795210852250,
+   "guid": "n^0toSOQc)",
+   "fields": {
+    "answer": "1 Ein Psalm Davids. Der HERR ist mein Hirte; mir wird nichts mangeln.",
+    "verse_number": "1",
+    "verse_part": "a",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span class='highlight'>E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span >E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span >E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span >U o i s w i f T, f i k U; </span><span >d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span >D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "[Beginning]",
+    "back": "1 Ein Psalm Davids. Der HERR ist mein Hirte; mir wird nichts mangeln.<br>2 Er weidet mich auf grüner Aue und führet mich zum frischen Wasser.<br>",
+    "first_letters": "E P D. D H i m H; m w n m.",
+    "last_letters": "Ei_ Psal_ David_. De_ HER_ is_ mei_ Hirt_; mi_ wir_ nicht_ mangel_.",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-0"
+   },
+   "cards": [
+    {
+     "id": 1795210852254,
+     "ord": 0,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852256,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852280,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852287,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852255,
+     "ord": 1,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852262,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852288,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852256,
+     "ord": 2,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852266,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852284,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852286,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852289,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852292,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852299,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852301,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852303,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852257,
+     "ord": 3,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852271,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852285,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852295,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1795210852251,
+   "guid": "MqXz5WV9oz",
+   "fields": {
+    "answer": "2 Er weidet mich auf grüner Aue und führet mich zum frischen Wasser.",
+    "verse_number": "2",
+    "verse_part": "a",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span >E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span class='highlight'>E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span >E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span >U o i s w i f T, f i k U; </span><span >d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span >D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "1 Ein Psalm Davids. Der HERR ist mein Hirte; mir wird nichts mangeln.<br>",
+    "back": "2 Er weidet mich auf grüner Aue und führet mich zum frischen Wasser.<br>3 Er erquicket meine Seele; er führet mich auf rechter Straße um seines Namens willen.<br>",
+    "first_letters": "E w m a g A u f m z f W.",
+    "last_letters": "E_ weide_ mic_ au_ grüne_ Au_ un_ führe_ mic_ zu_ frische_ Wasse_.",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-1"
+   },
+   "cards": [
+    {
+     "id": 1795210852258,
+     "ord": 0,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852257,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852296,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852298,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852259,
+     "ord": 1,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852263,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852260,
+     "ord": 2,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852267,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852300,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852261,
+     "ord": 3,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852272,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852294,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852297,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852302,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1795210852252,
+   "guid": "dOw,P-U98U",
+   "fields": {
+    "answer": "3 Er erquicket meine Seele; er führet mich auf rechter Straße um seines Namens willen.",
+    "verse_number": "3",
+    "verse_part": "a",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span >E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span >E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span class='highlight'>E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span >U o i s w i f T, f i k U; </span><span >d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span >D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "1 Ein Psalm Davids. Der HERR ist mein Hirte; mir wird nichts mangeln.<br>2 Er weidet mich auf grüner Aue und führet mich zum frischen Wasser.<br>",
+    "back": "3 Er erquicket meine Seele; er führet mich auf rechter Straße um seines Namens willen.<br>4 Und ob ich schon wanderte im finstern Tal, fürchte ich kein Unglück;<br>",
+    "first_letters": "E e m S; e f m a r S u s N w.",
+    "last_letters": "E_ erquicke_ mein_ Seel_; e_ führe_ mic_ au_ rechte_ Straß_ u_ seine_ Namen_ wille_.",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-2"
+   },
+   "cards": [
+    {
+     "id": 1795210852262,
+     "ord": 0,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852258,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852263,
+     "ord": 1,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852264,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852276,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852279,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852281,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852283,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852264,
+     "ord": 2,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852268,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852265,
+     "ord": 3,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852273,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1795210852253,
+   "guid": "hr.9w6wfPb",
+   "fields": {
+    "answer": "4 Und ob ich schon wanderte im finstern Tal, fürchte ich kein Unglück;",
+    "verse_number": "4",
+    "verse_part": "a",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span >E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span >E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span >E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span class='highlight'>U o i s w i f T, f i k U; </span><span >d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span >D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "2 Er weidet mich auf grüner Aue und führet mich zum frischen Wasser.<br>3 Er erquicket meine Seele; er führet mich auf rechter Straße um seines Namens willen.<br>",
+    "back": "4 Und ob ich schon wanderte im finstern Tal, fürchte ich kein Unglück;<br>denn du bist bei mir, dein Stecken und Stab trösten mich.<br>",
+    "first_letters": "U o i s w i f T, f i k U;",
+    "last_letters": "Un_ o_ ic_ scho_ wandert_ i_ finster_ Ta_, fürcht_ ic_ kei_ Unglüc_;",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-3"
+   },
+   "cards": [
+    {
+     "id": 1795210852266,
+     "ord": 0,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852259,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852277,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852304,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852306,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852309,
+       "ease": 1,
+       "type": 0
+      },
+      {
+       "id": 1795210852311,
+       "ease": 2,
+       "type": 0
+      },
+      {
+       "id": 1795210852312,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852313,
+       "ease": 4,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852267,
+     "ord": 1,
+     "queue": 2,
+     "revlog": [
+      {
+       "id": 1795210852265,
+       "ease": 3,
+       "type": 0
+      },
+      {
+       "id": 1795210852305,
+       "ease": 3,
+       "type": 0
+      }
+     ]
+    },
+    {
+     "id": 1795210852268,
+     "ord": 2,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852269,
+     "ord": 3,
+     "queue": 0,
+     "revlog": []
+    }
+   ]
+  },
+  {
+   "id": 1795210852254,
+   "guid": "jD16mzRvp}",
+   "fields": {
+    "answer": "denn du bist bei mir, dein Stecken und Stab trösten mich.",
+    "verse_number": "4",
+    "verse_part": "b",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span >E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span >E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span >E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span >U o i s w i f T, f i k U; </span><span class='highlight'>d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span >D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "3 Er erquicket meine Seele; er führet mich auf rechter Straße um seines Namens willen.<br>4 Und ob ich schon wanderte im finstern Tal, fürchte ich kein Unglück;<br>",
+    "back": "denn du bist bei mir, dein Stecken und Stab trösten mich.<br>5 Du bereitest vor mir einen Tisch im Angesicht meiner Feinde.<br>",
+    "first_letters": "d d b b m, d S u S t m.",
+    "last_letters": "den_ d_ bis_ be_ mi_, dei_ Stecke_ un_ Sta_ tröste_ mic_.",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-4"
+   },
+   "cards": [
+    {
+     "id": 1795210852270,
+     "ord": 0,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852271,
+     "ord": 1,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852272,
+     "ord": 2,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852273,
+     "ord": 3,
+     "queue": 0,
+     "revlog": []
+    }
+   ]
+  },
+  {
+   "id": 1795210852255,
+   "guid": "yc%olG~NOQ",
+   "fields": {
+    "answer": "5 Du bereitest vor mir einen Tisch im Angesicht meiner Feinde.",
+    "verse_number": "5",
+    "verse_part": "a",
+    "table": "<table border=1><tr><td style='width:20%;'><span><strong>1 </strong></span><span >E P D. D H i m H; m w n m. </span></td><td style='width:20%;'><span><strong>2 </strong></span><span >E w m a g A u f m z f W. </span></td><td style='width:20%;'><span><strong>3 </strong></span><span >E e m S; e f m a r S u s N w. </span></td><td style='width:20%;'><span><strong>4 </strong></span><span >U o i s w i f T, f i k U; </span><span >d d b b m, d S u S t m. </span></td><td style='width:20%;'><span><strong>5 </strong></span><span class='highlight'>D b v m e T i A m F. </span></td></tr></tr></table>",
+    "front": "4 Und ob ich schon wanderte im finstern Tal, fürchte ich kein Unglück;<br>denn du bist bei mir, dein Stecken und Stab trösten mich.<br>",
+    "back": "5 Du bereitest vor mir einen Tisch im Angesicht meiner Feinde.<br>",
+    "first_letters": "D b v m e T i A m F.",
+    "last_letters": "D_ bereites_ vo_ mi_ eine_ Tisc_ i_ Angesich_ meine_ Feind_.",
+    "title": "Psalm 23 & mehr",
+    "id": "1795210852250-5"
+   },
+   "cards": [
+    {
+     "id": 1795210852274,
+     "ord": 0,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852275,
+     "ord": 1,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852276,
+     "ord": 2,
+     "queue": 0,
+     "revlog": []
+    },
+    {
+     "id": 1795210852277,
+     "ord": 3,
+     "queue": 0,
+     "revlog": []
+    }
+   ]
+  }
+ ],
+ "otherNotes": 1,
+ "suspendedCard": 1795210852248,
+ "resetCard": 1795210852249
+}

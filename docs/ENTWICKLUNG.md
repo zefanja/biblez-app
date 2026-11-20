@@ -139,6 +139,33 @@ still. Nach jeder Änderung (Wiederholung, neue Sammlung, Einstellungen) wird
 neu geplant (`apps/client/src/reminders.ts`). Kanal „Tägliche Erinnerung“,
 Statusleisten-Icon `ic_stat_biblez` (aus `design/icon/icon-notification.svg`).
 
+## Import aus Anki
+
+Einstellungen → „Aus Anki importieren“ liest ein Anki-Stapelpaket (`.apkg`, auch
+`.colpkg`) mit Karten aus dem Add-on „Bible Memorizer“ **samt Lernverlauf**
+(`packages/core/src/anki/import.ts`). Beide Paketformate werden gelesen:
+`collection.anki21b` (aktuell, zstd, Schema 18) und `collection.anki21`/`.anki2`
+(„ältere Anki-Versionen unterstützen“, Schema 11).
+
+| Anki | BibleZ |
+|------|--------|
+| Notiztyp mit den Add-on-Feldern (auch umbenannt) | erkannt; andere Notiztypen werden ignoriert |
+| Feld `title` | eine Sammlung pro Titel, Reihenfolge nach Feld `id` |
+| Notiz-ID, GUID, Karten-IDs, **Notiztyp-ID** | übernommen – ein späterer Export aktualisiert dieselben Notizen in Anki |
+| Card 1 / 2 / 4 | Stufe 1 / 2 / 3; Card 3 (Tabelle) entfällt |
+| revlog | Nochmal → Nochmal; Schwer/Gut/Einfach → Gut; „Zurücksetzen“ verwirft den Verlauf davor |
+| alle Stufen gleichzeitig | höchste schon gelernte Stufe aktiv, niedrigere ruhen |
+
+Der Lernstand wird aus dem Verlauf mit BibleZ' FSRS neu berechnet (nicht aus
+Ankis gespeicherten Werten). Schon vorhandene Notizen (gleiche GUID) werden
+übersprungen.
+
+Testdaten: `tools/make-anki-fixtures.py` erzeugt mit dem echten Anki und dem
+Original-Notiztyp/-Notizgenerator des Add-ons zwei Exporte
+(`packages/core/test/fixtures/`). `pnpm verify:anki` prüft zusätzlich den
+Rundweg Anki → BibleZ → Anki (keine neuen Notizen, kein zweiter Notiztyp,
+keine Konflikte).
+
 ## App-Icon
 
 Motiv „Spross im Herzen“ (Ps 119,11 + Lk 8,11). Master-Grafiken in

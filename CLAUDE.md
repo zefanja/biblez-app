@@ -15,7 +15,8 @@ pnpm monorepo: `packages/core` (domain logic, no UI) and `apps/client`
 - `pnpm android:apk` – Android debug APK (JDK 21 + SDK in /opt/android-sdk)
 - `pnpm android:release` – signed .aab + .apk into dist-android/ (needs keystore, see docs)
 - `pnpm icons` – regenerate all icons from design/icon/*.svg
-- `pnpm verify:anki` – checks the .apkg export with the real Anki package (`.venv` with `anki`)
+- `pnpm verify:anki` – checks the .apkg export and the Anki → BibleZ → Anki round trip with the real Anki package (`.venv` with `anki`)
+- `.venv/bin/python tools/make-anki-fixtures.py` – regenerate the Anki import fixtures (needs ../bible-memorizer/src)
 
 Run `pnpm check` before every commit; add `pnpm verify:anki` for changes to
 scheduling, storage or export.

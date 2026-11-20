@@ -137,6 +137,22 @@ try {
   await dl.saveAs("/tmp/biblez-e2e.apkg");
   await shot("10-settings"); step(`Anki export downloaded (${size} bytes)`);
 
+  // Anki import: a real export of add-on cards with learning history
+  const fixture = fileURLToPath(new URL("../../../packages/core/test/fixtures/anki-modern.apkg", import.meta.url));
+  let dialogText = "";
+  page.on("dialog", (d) => { dialogText = d.message(); void d.accept(); });
+  await page.locator('input[accept*=".apkg"]').setInputFiles(fixture);
+  await page.getByText(/Importiert: 8 Abschnitte, \d+ Wiederholungen\./).waitFor();
+  if (!dialogText.includes("Psalm 23 & mehr")) throw new Error(`unexpected confirm text: ${dialogText}`);
+  step(`Anki import: ${(await page.getByText(/Importiert:/).textContent())?.trim()}`);
+  await page.locator('input[accept*=".apkg"]').setInputFiles(fixture);
+  await page.getByText("Alle Karten aus dieser Datei sind schon in BibleZ.").waitFor();
+  step("Anki import again: nothing duplicated");
+  await page.goto(`http://localhost:${port}/#/verses`);
+  await page.getByText("Psalm 23 & mehr").waitFor();
+  await shot("10b-imported");
+  await page.goto(`http://localhost:${port}/#/settings`);
+
   await page.getByRole("button", { name: "Dunkel" }).click();
   await page.goto(`http://localhost:${port}/#/`);
   await page.getByRole("heading", { name: "Heute" }).waitFor();

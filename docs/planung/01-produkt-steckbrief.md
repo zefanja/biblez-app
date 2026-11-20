@@ -367,6 +367,7 @@ mit echten Lerndaten überprüfen.
   Abschnitte in Textreihenfolge.
 
 - [x] Freie Übersetzungen (6) + Stellenangaben-Parser + Vorschläge (15 bekannte Stellen)
+- [x] Import aus Anki (Bible-Memorizer-Karten mit Lernverlauf), Rundweg zurück nach Anki ohne Duplikate
 
 **Als Nächstes:**
 1. NeÜ: Erlaubnis anfragen (optional)

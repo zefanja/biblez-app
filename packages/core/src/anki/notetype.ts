@@ -108,9 +108,9 @@ export const TEMPLATE_REQ = [
   [3, "any", [idx("front"), idx("back"), idx("answer")]],
 ];
 
-export function notetypeJson(deckId: number, nowSec: number): Record<string, unknown> {
+export function notetypeJson(deckId: number, nowSec: number, id: number = NOTETYPE_ID): Record<string, unknown> {
   return {
-    id: NOTETYPE_ID,
+    id,
     name: NOTETYPE_NAME,
     type: 0,
     mod: nowSec,

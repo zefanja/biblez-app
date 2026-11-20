@@ -23,11 +23,11 @@ export interface SqlDriver {
 
 const st = (sql: string, params: SqlValue[] = []): Statement => ({ sql, params });
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)`,
-  `CREATE TABLE IF NOT EXISTS collection (id TEXT PRIMARY KEY, title TEXT NOT NULL, kind TEXT NOT NULL, translation TEXT, source TEXT NOT NULL, learn_reference INTEGER NOT NULL, created_at INTEGER NOT NULL, anki_deck_id INTEGER NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS collection (id TEXT PRIMARY KEY, title TEXT NOT NULL, kind TEXT NOT NULL, translation TEXT, source TEXT NOT NULL, learn_reference INTEGER NOT NULL, created_at INTEGER NOT NULL, anki_deck_id INTEGER NOT NULL, anki_notetype_id INTEGER)`,
   `CREATE TABLE IF NOT EXISTS segment (id TEXT PRIMARY KEY, collection_id TEXT NOT NULL REFERENCES collection(id) ON DELETE CASCADE, position INTEGER NOT NULL, verse_number TEXT NOT NULL, part TEXT NOT NULL, text TEXT NOT NULL, anki_note_id INTEGER NOT NULL, anki_guid TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS card (id TEXT PRIMARY KEY, segment_id TEXT NOT NULL REFERENCES segment(id) ON DELETE CASCADE, stage INTEGER NOT NULL, anki_card_id INTEGER NOT NULL, unlocked_at INTEGER, retired_at INTEGER)`,
   `CREATE TABLE IF NOT EXISTS review (id TEXT PRIMARY KEY, card_id TEXT NOT NULL REFERENCES card(id) ON DELETE CASCADE, reviewed_at INTEGER NOT NULL, rating TEXT NOT NULL, duration_ms INTEGER NOT NULL)`,
@@ -38,10 +38,13 @@ const SCHEMA = [
 
 export async function initSchema(db: SqlDriver): Promise<void> {
   await db.run("PRAGMA foreign_keys = ON");
-  await db.batch([
-    ...SCHEMA.map((sql) => st(sql)),
-    st("INSERT OR IGNORE INTO meta (key, value) VALUES ('schema_version', ?)", [String(SCHEMA_VERSION)]),
-  ]);
+  await db.batch(SCHEMA.map((sql) => st(sql)));
+  // v2: databases created by v1 lack collection.anki_notetype_id
+  const columns = await db.all<{ name: string }>("PRAGMA table_info(collection)");
+  const migrations: Statement[] = [];
+  if (!columns.some((c) => c.name === "anki_notetype_id")) migrations.push(st("ALTER TABLE collection ADD COLUMN anki_notetype_id INTEGER"));
+  migrations.push(st("INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', ?)", [String(SCHEMA_VERSION)]));
+  await db.batch(migrations);
 }
 
 type Row = Record<string, SqlValue>;
@@ -60,6 +63,7 @@ export async function loadSnapshot(db: SqlDriver): Promise<Snapshot> {
     id: String(r.id), title: String(r.title), kind: r.kind === "verse" ? "verse" : "passage",
     translation: r.translation === null || r.translation === undefined ? null : String(r.translation), source: r.source === "bundled" ? "bundled" : "custom",
     learnReference: num(r.learn_reference) === 1, createdAt: num(r.created_at), ankiDeckId: num(r.anki_deck_id),
+    ankiNotetypeId: optNum(r.anki_notetype_id),
   }));
   snap.segments = segments.map((r) => ({
     id: String(r.id), collectionId: String(r.collection_id), position: num(r.position), verseNumber: String(r.verse_number),
@@ -79,7 +83,8 @@ export async function loadSnapshot(db: SqlDriver): Promise<Snapshot> {
 function collectionStatements(created: CreatedCollection): Statement[] {
   const c: Collection = created.collection;
   return [
-    st("INSERT INTO collection VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [c.id, c.title, c.kind, c.translation, c.source, c.learnReference ? 1 : 0, c.createdAt, c.ankiDeckId]),
+    st("INSERT INTO collection (id, title, kind, translation, source, learn_reference, created_at, anki_deck_id, anki_notetype_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [c.id, c.title, c.kind, c.translation, c.source, c.learnReference ? 1 : 0, c.createdAt, c.ankiDeckId, c.ankiNotetypeId ?? null]),
     ...created.segments.map((s: Segment) =>
       st("INSERT INTO segment VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [s.id, s.collectionId, s.position, s.verseNumber, s.part, s.text, s.ankiNoteId, s.ankiGuid])),
     ...cardStatements(created.cards),
@@ -101,6 +106,11 @@ export async function saveCards(db: SqlDriver, cards: Card[]): Promise<void> {
 /** Stores a review together with the cards it changed (unlock/retire) atomically. */
 export async function saveReview(db: SqlDriver, r: Review, changedCards: Card[] = []): Promise<void> {
   await db.batch([reviewStatement(r), ...cardStatements(changedCards)]);
+}
+
+/** Stores imported collections and their review history in one transaction. */
+export async function saveImport(db: SqlDriver, created: CreatedCollection[], reviews: Review[]): Promise<void> {
+  await db.batch([...created.flatMap(collectionStatements), ...reviews.map(reviewStatement)]);
 }
 
 export async function deleteCollection(db: SqlDriver, collectionId: string): Promise<void> {

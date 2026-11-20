@@ -5,8 +5,8 @@
 import { useSyncExternalStore } from "react";
 import {
   applyReview, createCollection, DEFAULT_SETTINGS, deleteCollection, exportApkg, loadMeta, loadSettings, loadSnapshot,
-  makeBackup, parseBackup, reactivate, restoreBackup, saveCards, saveCollection, saveMeta, saveReview, saveSettings,
-  type Card, type NewCollectionInput, type Rating, type ReviewResult, type Settings, type Snapshot, type SqlDriver,
+  importAnkiPackage, makeBackup, parseBackup, reactivate, restoreBackup, saveCards, saveCollection, saveImport, saveMeta,
+  saveReview, saveSettings, type AnkiImportResult, type Card, type NewCollectionInput, type Rating, type ReviewResult, type Settings, type Snapshot, type SqlDriver,
 } from "@biblez/core";
 import { getSqlJs, openDatabase, type DbKind } from "./db";
 
@@ -170,6 +170,17 @@ export const actions = {
 
   async restore(json: string) {
     await restoreBackup(db(), parseBackup(json));
+    await reload();
+  },
+
+  /** Reads an Anki export; nothing is stored yet (see commitAnkiImport). */
+  async prepareAnkiImport(bytes: Uint8Array): Promise<AnkiImportResult> {
+    const existingGuids = new Set(state.snapshot.segments.map((s) => s.ankiGuid));
+    return importAnkiPackage(await getSqlJs(), bytes, { existingGuids, settings: state.settings });
+  },
+
+  async commitAnkiImport(result: AnkiImportResult) {
+    await saveImport(db(), result.created, result.reviews);
     await reload();
   },
 

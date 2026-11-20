@@ -17,3 +17,4 @@ export { BOOKS, findBook, BOOK_BY_USFM, type BookInfo } from "./bible/books";
 export { parseReference, formatReference, isReference, type Reference, type ReferenceError } from "./bible/reference";
 export { validateReference, extractPassage, MAX_PASSAGE_VERSES, type BibleIndex, type BibleBook, type TranslationInfo, type PassageError } from "./bible/data";
 export { planReminders, REMINDER_DAYS, type ReminderTime, type PlannedReminder } from "./reminders";
+export { importAnkiPackage, AnkiImportError, cleanField, type AnkiImportResult, type AnkiImportReport, type AnkiImportOptions } from "./anki/import";

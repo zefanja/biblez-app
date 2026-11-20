@@ -18,6 +18,11 @@ export interface Collection {
   learnReference: boolean;
   createdAt: number;
   ankiDeckId: number;
+  /**
+   * Note type id in the user's Anki collection when the collection was imported
+   * from Anki; exports reuse it so Anki updates the existing notes. null = BibleZ's own.
+   */
+  ankiNotetypeId?: number | null;
 }
 
 export interface Segment {

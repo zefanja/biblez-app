@@ -61,3 +61,22 @@ describe("SQLite store", () => {
     expect(() => parseBackup('{"hello":1}')).toThrow("invalid_backup");
   });
 });
+
+describe("schema migration", () => {
+  it("adds anki_notetype_id to a version-1 database and keeps its data", async () => {
+    const SQL = await initSqlJs();
+    const raw = new SQL.Database();
+    raw.run("CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+    raw.run("CREATE TABLE collection (id TEXT PRIMARY KEY, title TEXT NOT NULL, kind TEXT NOT NULL, translation TEXT, source TEXT NOT NULL, learn_reference INTEGER NOT NULL, created_at INTEGER NOT NULL, anki_deck_id INTEGER NOT NULL)");
+    raw.run("INSERT INTO collection VALUES ('c1', 'Alt', 'verse', NULL, 'custom', 1, 1, 2)");
+    const db = sqlJsDriver(raw);
+    await initSchema(db);
+    const snap = await loadSnapshot(db);
+    expect(snap.collections).toEqual([expect.objectContaining({ id: "c1", title: "Alt", ankiNotetypeId: null })]);
+    const created = createCollection({ title: "Neu", verses: SAMPLES[0]!.verses });
+    created.collection.ankiNotetypeId = 1234;
+    await saveCollection(db, created);
+    expect((await loadSnapshot(db)).collections.find((c) => c.title === "Neu")?.ankiNotetypeId).toBe(1234);
+    await initSchema(db); // idempotent
+  });
+});

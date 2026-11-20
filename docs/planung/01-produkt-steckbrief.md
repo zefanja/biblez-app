@@ -1,6 +1,6 @@
 # Bible Memorizer App – Produkt-Steckbrief
 
-Status: **Entwurf v0.1** · Stand: 2026-11-20
+Status: **Entwurf v0.2** · Stand: 2026-11-20
 
 Dieses Dokument hält die bisherigen Entscheidungen fest, leitet daraus das
 Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen.
@@ -15,6 +15,14 @@ Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen
 | E2 | Allein oder in Gruppen? | **Allein**; Gruppen kommen später, das Datenmodell bereitet sie vor |
 | E3 | Woher kommen die Bibeltexte? | **Nur frei verfügbare Übersetzungen** plus **eigene Texte einfügen** |
 | E4 | Anki-Kompatibilität | **Export auf Knopfdruck, mit Lernverlauf** |
+| E5 | Antwortmodus im MVP | **Aufdecken + selbst bewerten** |
+| E6 | Bewertungsknöpfe | **Nur „Nochmal" / „Gut"** (in Anki: ease 1 / 3) |
+| E7 | Sync zwischen Geräten | **Später** (v1: lokal + Backup als Datei) |
+| E8 | Wer programmiert? | **LLM (Claude)** → Stack, der sich in der Cloud automatisch testen lässt |
+| E9 | Sprachen im MVP | **Deutsch + Englisch** (Oberfläche und Bibeltexte) |
+| E10 | Bibelstelle mitlernen | **Ja**: bei Einzelversen immer, bei Abschnitten optional |
+| E11 | Lizenz | Code gehört komplett dem Autor; Empfehlung **MIT**, siehe Abschnitt 12 |
+| E12 | Kinder unter 16 | **Ja** → Datenschutz nach Abschnitt 13 |
 
 ---
 
@@ -38,7 +46,8 @@ Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen
 |---------|--------------|-----------------|
 | **Einsteigerin „Lena"** | Will pro Woche einen Vers lernen, hat Anki nie benutzt | Ohne Anmeldung loslegen, einen Vers auswählen, in 2 Minuten das erste Erfolgserlebnis, tägliche Erinnerung |
 | **Kapitel-Lerner „Markus"** | Lernt Psalm 23, Römer 8, die Bergpredigt | Lange Abschnitte bequem anlegen, Recite-Modus, Überblick über den Fortschritt pro Vers |
-| **Anki-Umsteiger „Jonas"** | Nutzt das Plugin schon, will unterwegs am Handy lernen | Export (und später Import) mit Verlauf, FSRS-Einstellungen, 4 Bewertungsknöpfe optional |
+| **Anki-Umsteiger „Jonas"** | Nutzt das Plugin schon, will unterwegs am Handy lernen | Export (und später Import) mit Verlauf, FSRS-Einstellungen |
+| **Schülerin „Mia" (12)** | Lernt Verse für Schule oder Jungschar | Große, klare Bedienung, keine Anmeldung, keine Daten, die das Gerät verlassen |
 
 ---
 
@@ -102,10 +111,13 @@ Notiztyp nichts geändert werden.
 
 | Modus | MVP | Bewertung |
 |-------|-----|-----------|
-| **Aufdecken + selbst bewerten** | ✅ | Knöpfe: Standard 2 (Nochmal/Gut), optional 4 |
-| **Anfangsbuchstaben tippen** | ✅ (Vorschlag) | automatisch: 0 Fehler → Gut, 1–2 → Schwer, mehr → Nochmal; Nutzer kann korrigieren |
-| Wörter ordnen | später | automatisch |
-| Laut aufsagen (Spracherkennung) | später | automatisch |
+| **Aufdecken + selbst bewerten** | ✅ | Zwei Knöpfe: **Nochmal** / **Gut** |
+| Anfangsbuchstaben tippen | später | Nutzer bewertet weiterhin selbst; das Tippen ist nur eine Hilfe |
+| Wörter ordnen | später | Nutzer bewertet selbst |
+| Laut aufsagen (Spracherkennung) | später | offen |
+
+Mit nur zwei Knöpfen bleibt FSRS voll funktionsfähig. Im Anki-Export
+erscheinen die Bewertungen als ease 1 (Again) und 3 (Good).
 
 ### 4.5 Recite-Modus
 
@@ -223,7 +235,7 @@ angehängt wird. Der Kartenzustand ist eine Ableitung davon. Daraus folgt:
 
 ---
 
-## 8. Architektur (Empfehlung, Entscheidung offen)
+## 8. Architektur (entschieden)
 
 ```
 monorepo (pnpm)
@@ -237,14 +249,20 @@ monorepo (pnpm)
 └── tools/bibles       Import der freien Übersetzungen in ein kompaktes Format
 ```
 
-- **Offline zuerst**, lokale SQLite-Datenbank auf allen Plattformen.
-- **Oberfläche, Option A:** Web-App (React oder Svelte) + **Capacitor**
-  für iOS und Android. Der vorhandene Web-Code lässt sich am meisten
-  wiederverwenden, und die App ist am schnellsten fertig.
-- **Oberfläche, Option B:** **Expo / React Native** (+ Expo Web). Fühlt sich
-  nativer an, das Web ist etwas schwächer.
-- Version 1 ohne Server: Backup und Wiederherstellung als Datei.
-  Sync als nächster Ausbauschritt (siehe offene Fragen).
+- **TypeScript + React + Vite**, als Web-App/PWA, mit **Capacitor** für
+  iOS und Android. Eine Codebasis, ein DOM.
+- **Begründung (E8):** Claude kann die Web-Version in der Cloud-Umgebung
+  bauen und mit Playwright automatisch testen. Native Simulatoren gibt es dort
+  nicht. Je dünner die native Schicht, desto mehr lässt sich automatisch
+  prüfen. React und Capacitor sind außerdem sehr verbreitet und gut dokumentiert.
+- **Offline zuerst**, lokale SQLite-Datenbank: im Web per wa-sqlite/OPFS,
+  auf dem Handy per Capacitor-SQLite-Plugin, hinter derselben
+  Repository-Schnittstelle.
+- Native Funktionen über Capacitor: lokale Benachrichtigungen,
+  Teilen-Menü (Export an AnkiDroid/AnkiMobile), Dateizugriff für Backups.
+- Tests: `core` mit Vitest (Logik, FSRS, Export), Oberfläche mit Playwright,
+  Anki-Kompatibilität mit dem Python-Paket `anki` (Import ohne Oberfläche in CI).
+- Version 1 ohne Server.
 
 ---
 
@@ -271,21 +289,13 @@ Gruppen und Klassen · weitere Sprachen · Homescreen-Widgets
 
 ## 10. Offene Fragen
 
-**Runde 2 (als Nächstes zu klären):**
-1. Antwortmodi im MVP: Aufdecken + Anfangsbuchstaben tippen in Ordnung?
-2. Bewertung: 2 Knöpfe als Standard, 4 optional?
-3. Sync zwischen Geräten schon in v1 oder erst v1.1?
-4. Technik: Welche Vorkenntnisse sind da (Web/React/Svelte/TS)? Entscheidung
-   zwischen Capacitor und Expo.
-5. Sprachen der Oberfläche und der Bibeltexte im MVP: nur DE/EN?
-6. Bibelstelle mitlernen: bei Einzelversen immer, bei Abschnitten optional?
-7. Geschäftsmodell: kostenlos/Spenden? Open Source?
-8. Lizenz: Das Repo steht unter **GPLv3**. GPL und die Bedingungen des
-   App Store vertragen sich nicht gut (bekannter Fall: VLC). Wenn du alle
-   Rechte am Code hast, kannst du die App doppelt lizenzieren oder eine andere
-   Lizenz wählen. Wer hat zu `app/` beigetragen?
-9. App-Name: Ist „Bible Memorizer" in den Stores noch frei?
-10. Sollen Kinder und Jugendliche (unter 16) die App nutzen? (Datenschutz, Kategorie im Store)
+**Runde 3 (Design):**
+1. Stil: ruhig und andächtig oder spielerisch und bunt?
+2. Startseite: „Heute" (fällige Verse) oder „Meine Sammlungen"?
+3. Einstieg: Vorschlagsliste bekannter Verse beim ersten Start?
+4. App-Name und Logo; Lizenz bestätigen (MIT?)
+5. Geschäftsmodell: kostenlos, Spenden?
+6. Motivation: Streak ja/nein; welche Kennzahl steht im Vordergrund?
 
 ---
 
@@ -299,3 +309,39 @@ Gruppen und Klassen · weitere Sprachen · Homescreen-Widgets
 4. Lizenzen der freien Übersetzungen prüfen, Quellformat festlegen
 5. Nutzerabläufe und Wireframes: Einstieg, „Heute", Lernen, Sammlung anlegen, Export
 6. Klickbarer Prototyp → Test mit 5 Personen aus der Zielgruppe
+
+---
+
+## 12. Lizenz (Empfehlung)
+
+- **Code: MIT.** Einfach, keine Konflikte mit den App Stores, Beiträge von
+  anderen sind unkompliziert, ts-fsrs und sql.js sind ebenfalls MIT.
+- Copyleft (GPL/AGPL) verhindert **keine** Kopien in den Stores. Es
+  verlangt nur, dass der Quellcode offengelegt wird. Für Store-Apps
+  erschwert es dagegen Beiträge von anderen: Ohne Zustimmung aller
+  Beitragenden (CLA) oder eine App-Store-Ausnahme darfst du deren Code nicht
+  selbst im App Store veröffentlichen.
+- **Den Namen und das Logo schützen** (nicht unter die Code-Lizenz stellen,
+  Markenhinweis im README). Das verhindert verwechselbare Kopien wirksamer als
+  jede Code-Lizenz.
+- Falls später ein Sync-Server dazukommt und kein geschlossener gehosteter
+  Klon entstehen soll: nur den Server unter **AGPLv3** stellen.
+- Bibeltexte haben ihre eigenen Lizenzen; sie sind von der Code-Lizenz
+  getrennt (eigene `LICENSE`-Datei pro Übersetzung).
+- Frühere Versionen bleiben unter GPLv3; ab dem Wechsel gilt die neue Lizenz.
+  (Keine Rechtsberatung.)
+
+## 13. Datenschutz und Kinder (E12)
+
+- **v1 erhebt keine personenbezogenen Daten:** keine Konten, kein Tracking,
+  keine Analyse- oder Werbe-SDKs, alles bleibt lokal auf dem Gerät.
+  Damit sind DSGVO Art. 8 und COPPA praktisch erledigt.
+- Absturzberichte höchstens per Opt-in, ohne Drittanbieter-SDK.
+- Externe Links (Lizenzen, Spenden) hinter einer einfachen „Eltern-Hürde"
+  oder ganz weglassen.
+- Store: Altersfreigabe 4+ bzw. „Jeder". Die Apple-Kategorie „Kinder" erst
+  einmal **nicht** wählen (strengere Prüfung, Einschränkungen bei Links),
+  aber die Regeln trotzdem einhalten.
+- **Sync später:** Konten für Kinder brauchen die Zustimmung der Eltern
+  (Deutschland: unter 16; USA: unter 13). Alternative ohne personenbezogene
+  Daten: anonymer Sync-Code oder QR-Code statt E-Mail-Konto.

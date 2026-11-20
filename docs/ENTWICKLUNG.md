@@ -78,8 +78,28 @@ pnpm android:apk
 Ergebnis: `apps/client/android/app/build/outputs/apk/debug/app-debug.apk`
 (≈14 MB, mit Debug-Schlüssel signiert, alle sechs Bibelübersetzungen enthalten).
 
-Noch offen: Release-Signatur (Keystore), App-Icon/Splash, natives SQLite statt
+Noch offen: Release-Signatur (Keystore), natives SQLite statt
 IndexedDB, lokale Erinnerungen, Teilen-Menü für den Anki-Export.
+
+## App-Icon
+
+Motiv „Spross im Herzen“ (Ps 119,11 + Lk 8,11). Master-Grafiken in
+`design/icon/`:
+
+| Datei | Zweck |
+|-------|-------|
+| `icon-full.svg` | iOS, Play Store, PWA, alte Android-Launcher – Herz so groß wie möglich |
+| `icon-foreground.svg` | Android adaptive Icon (108 dp, Herz im 66-dp-Sicherheitskreis) |
+| `icon-monochrome.svg` | Android 13+ Themed Icon |
+| `icon-maskable.svg` | PWA maskable (80-%-Sicherheitskreis) |
+| `favicon.svg` | Browser-Tab, abgerundete Kachel |
+
+Nach einer Änderung alle PNGs neu erzeugen (Android-Launcher, Splash, Web,
+Store-Grafiken in `design/icon/out/`):
+
+```bash
+pnpm icons
+```
 
 ## iOS
 

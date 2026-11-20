@@ -28,10 +28,15 @@ export function Icon({ name, size = 22, label }: { name: IconName; size?: number
 export function Logo() {
   return (
     <div className="row" style={{ gap: 10 }}>
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
-        <rect width="32" height="32" rx="9" fill="var(--accent)" />
-        <path d="M9 10.5c2.5-1 5-1 7 .8 2-1.8 4.5-1.8 7-.8v11c-2.5-1-5-1-7 .8-2-1.8-4.5-1.8-7-.8z" fill="none" stroke="var(--on-accent)" strokeWidth="1.6" strokeLinejoin="round" />
-        <path d="M16 11.3v11" stroke="var(--on-accent)" strokeWidth="1.6" />
+      <svg width="32" height="32" viewBox="0 0 100 100" aria-hidden="true">
+        <rect width="100" height="100" rx="22" fill="var(--accent)" />
+        <g transform="translate(50 51) scale(1.5) translate(-50 -53.81)">
+          <path d="M50 36 C44 27 24 26 22 43 C21 57 36 67 50 78 C64 67 79 57 78 43 C76 26 56 27 50 36 Z" fill="var(--on-accent)" />
+          <path d="M50 68 V47" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
+          <path d="M50 59 C43 59.5 37 55 36 47 C44 47 49.5 51 50 59 Z" fill="var(--accent)" />
+          <path d="M50 53 C50.5 44.5 56.5 39 65 38 C65 46.5 58.5 52 50 53 Z" fill="var(--accent)" />
+          <path d="M36 68 Q43 64.5 50 68 Q57 64.5 64 68 L64 71.5 Q57 68 50 71.5 Q43 68 36 71.5 Z" fill="var(--accent)" />
+        </g>
       </svg>
       <span style={{ fontSize: 20, fontWeight: 700 }}>BibleZ</span>
     </div>

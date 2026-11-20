@@ -177,7 +177,7 @@ export function buildAnkiCollection(SQL: SqlJsStatic, snapshot: Snapshot, option
           } else {
             type = st.state === State.Relearning ? 3 : 1; queue = 1;
             due = Math.floor(st.due.getTime() / 1000);
-            left = st.state === State.Relearning ? 1 : Math.max(1, 2 - st.learning_steps);
+            left = 1;
             factor = st.state === State.Relearning ? 2500 : 0;
           }
           let lastIvl = 0;

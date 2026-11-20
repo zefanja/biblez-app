@@ -1,0 +1,10 @@
+{
+  "name": "BibleZ",
+  "short_name": "BibleZ",
+  "description": "Bibelverse auswendig lernen",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F6F5F1",
+  "theme_color": "#2C6A63",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

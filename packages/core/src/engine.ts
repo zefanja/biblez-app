@@ -226,12 +226,14 @@ export function buildQueue(snapshot: Snapshot, now: number = Date.now(), setting
 
   const dueReviews: CardStatus[] = [];
   const learningNow: CardStatus[] = [];
+  const learnAhead: CardStatus[] = [];
   const later: CardStatus[] = [];
   const fresh: CardStatus[] = [];
   for (const s of statuses) {
     if (s.isNew) fresh.push(s);
     else if (s.fsrs.state === State.Learning || s.fsrs.state === State.Relearning) {
-      if (s.due <= now + LEARN_AHEAD_MS) learningNow.push(s);
+      if (s.due <= now) learningNow.push(s);
+      else if (s.due <= now + LEARN_AHEAD_MS) learnAhead.push(s); // shown after everything else
       else if (s.due < tomorrow) later.push(s);
     } else if (s.due < tomorrow) dueReviews.push(s);
   }
@@ -247,6 +249,7 @@ export function buildQueue(snapshot: Snapshot, now: number = Date.now(), setting
     return x[0] - y[0] || x[1] - y[1] || x[2] - y[2];
   };
   learningNow.sort((a, b) => a.due - b.due);
+  learnAhead.sort((a, b) => a.due - b.due);
   dueReviews.sort((a, b) => a.due - b.due || byOrder(a, b));
   later.sort((a, b) => a.due - b.due);
   fresh.sort(byOrder);
@@ -276,7 +279,7 @@ export function buildQueue(snapshot: Snapshot, now: number = Date.now(), setting
       return true;
     });
 
-  const nowList = [...pick(learningNow, true), ...pick(dueReviews, true), ...pick(newCards, false)];
+  const nowList = [...pick(learningNow, true), ...pick(dueReviews, true), ...pick(newCards, false), ...pick(learnAhead, true)];
   return { now: nowList, later: pick(later, true), newLeftToday };
 }
 

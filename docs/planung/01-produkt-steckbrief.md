@@ -347,18 +347,24 @@ mit echten Lerndaten überprüfen.
 
 ---
 
-## 11. Nächste Schritte
+## 11. Stand und nächste Schritte
 
-1. Runde 2 beantworten → Steckbrief v0.2
-2. **Technischer Test 1:** apkg mit revlog und FSRS-Zustand erzeugen und in
-   Anki Desktop, AnkiDroid und AnkiMobile importieren (siehe 6.3)
-3. **Technischer Test 2:** Segmentierung und Anfangsbuchstaben für alle
-   Zielsprachen (Intl.Segmenter)
-4. Lizenzen der freien Übersetzungen prüfen, Quellformat festlegen
-5. Nutzerabläufe und Wireframes: Einstieg, „Heute", Lernen, Sammlung anlegen, Export
-6. Klickbarer Prototyp → Test mit 5 Personen aus der Zielgruppe
+**Erledigt (Stand 2026-11-20):**
+- [x] Technischer Test 1: Anki-Export mit Lernverlauf (siehe 6.3)
+- [x] `packages/core`: Abschnitte, Stufen-Engine, FSRS, Export, SQLite-Store, Backup (24 Tests)
+- [x] `apps/client`: erste lauffähige Web-Version – erster Start mit Joh 3,16,
+      Lernen (Nochmal/Gut), Heute, Meine Verse, Vers hinzufügen (Vorschläge +
+      eigener Text), Rezitieren, Einstellungen, Anki-Export, Backup,
+      Dunkelmodus, Schriftgröße, DE/EN; Browser-Test grün
+- Entscheidung beim Testen: **ein Lernschritt (1 Min.)** – „Nochmal" kommt in
+  derselben Runde wieder, „Gut" ist für heute erledigt.
 
----
+**Als Nächstes:**
+1. Abschnitte vor dem Anlegen von Hand anpassen (trennen/zusammenlegen)
+2. Freie Übersetzungen importieren (Lizenzen prüfen) + Stellenangaben-Parser
+3. Capacitor: iOS/Android-Projekte, SQLite-Plugin, lokale Erinnerung, Teilen-Menü für den Export
+4. PWA: Offline-Cache (Service Worker), installierbar
+5. Test mit 5 Personen aus der Zielgruppe
 
 ## 12. Lizenz (Empfehlung)
 

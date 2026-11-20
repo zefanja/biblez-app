@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.out/
+.cache/
+apps/client/public/bibles/
+test-results/
+playwright-report/
+*.tsbuildinfo
+__pycache__/
+.venv/

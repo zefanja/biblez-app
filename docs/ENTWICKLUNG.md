@@ -1,7 +1,10 @@
 # BibleZ – Entwicklung
 
-Monorepo (pnpm) für die BibleZ-App (Web, iOS, Android). Das Anki-Plugin in
-`src/` und das alte Web-Tool in `app/` bleiben unverändert daneben.
+Monorepo (pnpm) für die BibleZ-App (Web, iOS, Android). Das Anki-Add-on
+„Bible Memorizer“ liegt in einem eigenen Repo:
+[zefanja/bible-memorizer](https://github.com/zefanja/bible-memorizer). Der
+Notiztyp in `packages/core/src/anki/notetype.ts` ist eine Kopie aus dessen
+`src/model.py` (Version 1.5) und muss bei Änderungen dort mitgezogen werden.
 
 ```
 packages/core   Logik ohne UI: Abschnitte, Stufen-Engine, FSRS, Anki-Export, SQLite-Store
@@ -42,7 +45,7 @@ Browser-Test (baut die App und klickt sie in Chromium durch):
 pnpm --filter @biblez/client build && node apps/client/e2e/smoke.mjs
 ```
 
-Anki-Kompatibilität (braucht `pip install anki`):
+Anki-Kompatibilität (braucht das Python-Paket `anki`, z. B. in `.venv`):
 
 ```bash
 pnpm verify:anki

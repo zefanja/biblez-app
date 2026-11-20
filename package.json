@@ -10,7 +10,11 @@
     "build": "pnpm bibles && pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "verify:anki": "pnpm --filter @biblez/core export:sample && python3 tools/anki_verify.py packages/core/.out/sample.apkg",
+    "verify:anki": "pnpm --filter @biblez/core export:sample && (test -x .venv/bin/python && .venv/bin/python || python3) tools/anki_verify.py packages/core/.out/sample.apkg",
     "bibles": "pnpm --filter @biblez/core bibles"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zefanja/biblez-app"
   }
 }

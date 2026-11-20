@@ -1,6 +1,6 @@
 # Bible Memorizer App – Produkt-Steckbrief
 
-Status: **Entwurf v0.3** · Stand: 2026-11-20
+Status: **Entwurf v0.4** · Stand: 2026-11-20
 
 Dieses Dokument hält die bisherigen Entscheidungen fest, leitet daraus das
 Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen.
@@ -29,6 +29,10 @@ Lernkonzept, das Datenmodell und den MVP-Umfang ab und listet die offenen Fragen
 | E16 | Motivation | **Kein Streak**; Kennzahl „Sicher im Gedächtnis" |
 | E17 | Name | **BibleZ** |
 | E18 | Geld | Vorerst **kostenlos**; Spenden ggf. später |
+| E19 | Abschnittslänge | **Kurze Abschnitte**, 3–7 Wörter (4.2) |
+| E20 | Stufen | **Eine Stufe nach der anderen**, keine Geschwister am selben Tag (4.3) |
+| E21 | Lizenz | **MIT** bestätigt |
+| E22 | Dunkelmodus, Schriftgröße | **In v1** |
 
 ---
 
@@ -89,20 +93,42 @@ Bei einer Sammlung mit **einem einzigen Vers** zeigt Stufe 3 nur Titel und
 Stelle. Sie ist damit automatisch eine Karte „Stelle → Text". Dafür muss am
 Notiztyp nichts geändert werden.
 
-### 4.2 Schrittweise Freischaltung (die App versteckt die Anki-Komplexität)
+### 4.2 Kurze Abschnitte (Chunks)
 
-- Neue Abschnitte beginnen auf Stufe 1. Stufe *n+1* wird erst
-  **freigeschaltet**, wenn die Stabilität der Karte auf Stufe *n* einen
-  Schwellenwert erreicht (Vorschlag: ≥ 3 Tage; einstellbar).
-  Im „Anki-Modus" sind alle Stufen sofort aktiv.
+- Verse werden automatisch in **kurze Abschnitte** geteilt: an Satzzeichen
+  (`,` `;` `:` `.`), Ziel **3–7 Wörter**, höchstens etwa 8. Ein Abschnitt
+  mit weniger als 3 Wörtern wird mit dem Nachbarn zusammengelegt.
+- Beispiel Joh 3,16 (Luther 1912), 5 Abschnitte:
+  a „Also hat Gott die Welt geliebt," · b „daß er seinen eingebornen Sohn gab," ·
+  c „auf daß alle, die an ihn glauben," · d „nicht verloren werden," ·
+  e „sondern das ewige Leben haben."
+- Der Nutzer kann die Teilung vor dem Anlegen anpassen (Abschnitte trennen oder zusammenlegen).
+- Jeder Abschnitt ist eine Anki-Notiz (`verse_part` a, b, c …). Als Kontext
+  zeigt die Vorderseite die bis zu 2 vorherigen Abschnitte, wie im Plugin.
+
+### 4.3 Eine Stufe nach der anderen
+
+- **Pro Abschnitt ist immer genau eine Stufe aktiv.** Geschwisterkarten
+  (derselbe Abschnitt, andere Stufe) kommen nie am selben Tag.
+- Neue Abschnitte beginnen auf Stufe 1. Am ersten Tag gibt es also nur
+  Stufe 1. „Nochmal" holt die Karte in derselben Sitzung zurück.
+- **Aufstieg:** Erreicht die Karte auf Stufe *n* eine Stabilität von
+  **≥ 7 Tagen** (≈ 2–3 erfolgreiche Wiederholungen), wird Stufe *n+1*
+  freigeschaltet und ab dem nächsten Tag fällig.
+- **Die alte Stufe ruht** (wird in Anki als *ausgesetzt*/suspended
+  exportiert). Das hält die Zahl der Wiederholungen niedrig. Jede Karte
+  behält ihren eigenen FSRS-Verlauf, das Modell bleibt also sauber.
+- **Kein automatisches Zurückstufen.** Wenn auf der höheren Stufe zweimal
+  hintereinander „Nochmal" gedrückt wird, bietet die App an, die vorherige
+  Stufe als Hilfe zurückzuholen.
+- **„Sicher im Gedächtnis":** Der Vers ist auf Stufe 3 angekommen, und alle
+  seine Abschnitte haben dort eine Stabilität ≥ 21 Tage (wie die Schwelle
+  „mature" im Plugin).
 - Die Oberfläche zeigt pro Vers nur „Stufe 2 von 3" und eine
   Fortschrittsanzeige, keine einzelnen Karten.
-- Bei Fehlern auf einer höheren Stufe wird die Karte nur neu geplant;
-  es gibt kein automatisches Zurückstufen (hält das FSRS-Modell sauber).
-- Karten derselben Abschnitts erscheinen nicht am selben Tag (wie das
-  „Burying" von Geschwisterkarten in Anki).
+- Im „Anki-Modus" (Einstellung für Fortgeschrittene) sind alle Stufen sofort aktiv.
 
-### 4.3 FSRS
+### 4.4 FSRS
 
 - Bibliothek: [`ts-fsrs`](https://github.com/open-spaced-repetition/ts-fsrs)
   (die offizielle TypeScript-Umsetzung).
@@ -113,7 +139,7 @@ Notiztyp nichts geändert werden.
 - Tageslimit für neue Abschnitte (Standard: 5) und eine Vorschau, wie viele
   Wiederholungen in den nächsten 7 Tagen anstehen.
 
-### 4.4 Antwortmodi
+### 4.5 Antwortmodi
 
 | Modus | MVP | Bewertung |
 |-------|-----|-----------|
@@ -125,7 +151,7 @@ Notiztyp nichts geändert werden.
 Mit nur zwei Knöpfen bleibt FSRS voll funktionsfähig. Im Anki-Export
 erscheinen die Bewertungen als ease 1 (Again) und 3 (Good).
 
-### 4.5 Recite-Modus
+### 4.6 Recite-Modus
 
 Wird aus dem Plugin übernommen: Der Abschnitt wird Vers für Vers aufgedeckt,
 die Hilfestufe richtet sich nach dem Lernstand. **Kein Einfluss auf die
@@ -295,11 +321,11 @@ Gruppen und Klassen · weitere Sprachen · Homescreen-Widgets
 
 ## 10. Offene Fragen
 
-**Runde 4 (Feedback zum Prototyp):**
-1. Stimmen Farben, Schriften und Ton?
-2. Bleibt die Bibelstelle im ersten Lernfluss bei 4 Karten (16a/16b Stufe 1, 16a Stufe 2, ganzer Vers Stufe 3)?
-3. Lizenz MIT bestätigen
-4. Dunkelmodus und Schriftgröße: wie wichtig für v1?
+Erledigt in Runde 4: Look passt; kurze Abschnitte und eine Stufe nach der
+anderen (4.2, 4.3); Lizenz MIT; Dunkelmodus und Schriftgröße in v1.
+
+Noch offen: Schwellenwerte (7 Tage für den Aufstieg, 21 Tage für „sicher")
+mit echten Lerndaten überprüfen.
 
 ---
 
